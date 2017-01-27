@@ -31,26 +31,26 @@ class DraggableButton(Button, DragNDropWidget):
     pass
 ```
 
-Properties:
-* droppable_zone_objects:
+## Properties:
+* `droppable_zone_objects`
   * a list of IDs of objects that you can drop widgets of this class into
-* bound_zone_objects:
+* `bound_zone_objects`
   * a list of objects that create a boxed-in boundary where the widget cannot be dragged past.
-* drag_opacity:
+* `drag_opacity`
   * a real number between 0.0 and 1.0 that defines the opacity of the widget while it is dragged.
-* drop_func:
+* `drop_func`
   * the name of a function that will be called upon a successful drop
-* drop_args:
+* `drop_args`
   * a list which are given as the arguments to the function
-* failed_drop_func:
+* `failed_drop_func`
   * the name of a function that will be called upon an unsuccessful drop
-* failed_drop_args:
+* `failed_drop_args`
   * a list which are given as the arguments to the function
-* remove_on_drag:
+* `remove_on_drag`
   * Boolean. If True, the widget is removed from the parent widget (perhaps a layout of some sort) and added to the destination widget. It will be re-added to the parent, in its old position, if the object is not dragged elsewhere. If False, a copy of the widget is made and that copy is added to the destination. If the object is not dragged elsewhere the copy is destroyed.
-* drop_ok_animation_time:
+* `drop_ok_animation_time`
   * When it's dropped the object is faded away. This is the duration of that fade. Defaults to 0.7s.
-* not_drop_ok_animation_time:
+* `not_drop_ok_animation_time`
   * If the object is not dragged elsewhere, this is the duration of the fade animation. Defaults to 0.7s.
 
 # Additional Capabilities and Notes:
@@ -58,7 +58,7 @@ Properties:
 You can have a number of widgets stacked on top of each other as drop recipients.
 
 Upon a successful drop, if the destination widget has a function
-literally called "drop_func", then that function is called with the
+literally called `drop_func`, then that function is called with the
 dragged object as its argument.
 
 If you cover a drop destination widget with another widget that is not a
@@ -70,10 +70,10 @@ of the covering widget.
 Schwager's mods to DragNDropWidget.py
 
 - Added Properties:
-  failed_drop_func
-  failed_drop_args
-  drop_ok_animation_time
-  not_drop_ok_animation_time
+  `failed_drop_func`
+  `failed_drop_args`
+  `drop_ok_animation_time`
+  `not_drop_ok_animation_time`
 
 - changed the spelling of "dragable" to "draggable". Because it's
   "dragged" and not "draged". And "dragging", not "draging".
