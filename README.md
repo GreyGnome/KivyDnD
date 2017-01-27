@@ -12,8 +12,7 @@ made it unusable, and made a number of other fixes.
 
 My mods are listed at the end of this README.
 
-=======================================================================
-Usage:
+# Usage:
 
 Create a subdirectory somewhere alongside your executable. Put all the
 files in this repo into that subdirectory. Import the DragNDropWidget.py
@@ -23,57 +22,49 @@ I have the file "DragNDropWidget.py", place in your python file:
 import DragNDropWidget.DragNDropWidget
 
 
-API
+# API
 
 Your widget must subclass DragNDropWidget.
 
+```Python
 class DraggableButton(Button, DragNDropWidget):
     pass
+```
 
 Properties:
-    droppable_zone_objects:
-        a list of IDs of objects that you can drop widgets of this class into
-    bound_zone_objects:
-        a list of objects that create a boxed-in boundary where the widget
-        cannot be dragged past.
-    drag_opacity:
-        a real number between 0.0 and 1.0 that defines the opacity of the
-        widget while it is dragged.
-    drop_func:
-        the name of a function that will be called upon a successful drop
-    drop_args:
-        a list which are given as the arguments to the function
-    failed_drop_func:
-        the name of a function that will be called upon an unsuccessful
-        drop
-    failed_drop_args:
-        a list which are given as the arguments to the function
-    remove_on_drag:
-        Boolean. If True, the widget is removed from the parent widget
-        (perhaps a layout of some sort) and added to the destination
-        widget. It will be re-added to the parent, in its old position,
-        if the object is not dragged elsewhere. If False, a copy of the
-        widget is made and that copy is added to the destination. If
-        the object is not dragged elsewhere the copy is destroyed.
-    drop_ok_animation_time:
-        When it's dropped the object is faded away. This is the duration
-        of that fade. Defaults to 0.7s.
-    not_drop_ok_animation_time:
-        If the object is not dragged elsewhere, this is the duration of
-        the fade animation. Defaults to 0.7s.
+* droppable_zone_objects:
+  * a list of IDs of objects that you can drop widgets of this class into
+* bound_zone_objects:
+  * a list of objects that create a boxed-in boundary where the widget cannot be dragged past.
+* drag_opacity:
+  * a real number between 0.0 and 1.0 that defines the opacity of the widget while it is dragged.
+* drop_func:
+  * the name of a function that will be called upon a successful drop
+* drop_args:
+  * a list which are given as the arguments to the function
+* failed_drop_func:
+  * the name of a function that will be called upon an unsuccessful drop
+* failed_drop_args:
+  * a list which are given as the arguments to the function
+* remove_on_drag:
+  * Boolean. If True, the widget is removed from the parent widget (perhaps a layout of some sort) and added to the destination widget. It will be re-added to the parent, in its old position, if the object is not dragged elsewhere. If False, a copy of the widget is made and that copy is added to the destination. If the object is not dragged elsewhere the copy is destroyed.
+* drop_ok_animation_time:
+  * When it's dropped the object is faded away. This is the duration of that fade. Defaults to 0.7s.
+* not_drop_ok_animation_time:
+  * If the object is not dragged elsewhere, this is the duration of the fade animation. Defaults to 0.7s.
 
-Additional Capabilities and Notes:
-    You can have a number of widgets stacked on top of each other as
-    drop recipients.
+# Additional Capabilities and Notes:
 
-    Upon a successful drop, if the destination widget has a function
-    literally called "drop_func", then that function is called with the
-    dragged object as its argument.
+You can have a number of widgets stacked on top of each other as drop recipients.
 
-    If you cover a drop destination widget with another widget that is not a
-    drop destination, that widget will prevent the underlying drop
-    destination from receiving a drop anywhere in the rectangle coordinates
-    of the covering widget.
+Upon a successful drop, if the destination widget has a function
+literally called "drop_func", then that function is called with the
+dragged object as its argument.
+
+If you cover a drop destination widget with another widget that is not a
+drop destination, that widget will prevent the underlying drop
+destination from receiving a drop anywhere in the rectangle coordinates
+of the covering widget.
 
 ========================================================================
 Schwager's mods to DragNDropWidget.py
