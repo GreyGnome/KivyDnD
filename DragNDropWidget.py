@@ -115,7 +115,13 @@ class DragNDropWidget(Widget):
                 self.min_x = obj.x
 
     def on_touch_down(self, touch):
-
+        """
+        on_touch_down contains a numerical value. If the object is touched for a period longer than
+        this value then we may be entering a drag operation. The value should probably be made
+        configurable. As a matter of fact, I'm sure it should be. ...TODO.
+        :param touch:
+        :return:
+        """
         if self.collide_point(touch.x, touch.y) and self._draggable:
             # detect if the touch is short - has time and end (if not dispatch drag)
             if abs(touch.time_end - touch.time_start) > 0.2:
