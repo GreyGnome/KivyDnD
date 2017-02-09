@@ -13,29 +13,51 @@ Distributed under the Apache 2.0 License. See the LICENSE file for more informat
 
 # Usage:
 
-Create a subdirectory somewhere alongside your executable. Put all the files in this repo into that subdirectory. Import the DragNDropWidget.py file. That is, assuming that I have a subdirectory "DragNDropWidget" wherein I have the file "DragNDropWidget.py", place in your python file:
+Create a subdirectory somewhere alongside your executable. Put all the files in this repo into that subdirectory. Import the DragNDropWidget.py file, then your widget must subclass `DragNDropWidget`. Example: assume
+* that I have a subdirectory "DragNDropWidget" wherein
+* I have the file "DragNDropWidget.py", then place in your python file:
 
 ```Python
-import DragNDropWidget.DragNDropWidget
+from DragNDropWidget.DragNDropWidget import DragNDropWidget
+
+class DraggableButton(Button, DragNDropWidget):
+    <do Button-y stuff>
 ```
 
 See `dndapp2.py` for a fairly complete working example.
+
+Alternatively, you could simply import the DragNDropWidget file, in which case you'd need to be specific about your subclassing. That is:
+```Python
+# Here's the directory and module
+import DragNDropWidget.DragNDropWidget
+
+# The class is inside it. Ew, ugly...
+class DraggableButton(Button, DragNDropWidget.DragNDropWidget.DragNDropWidget):
+```
+...that's a lot of `DragNDropWidget`'ing.
 
 # Support
 This software is delivered without a warranty, and not even a guarantee that it will work as advertised. If you encounter a bug, please
 * Send me a fix. This is best. If you can't,
 * Create a small- wery small- app that demonstrates the anomalous behavior you observe.
 Finally,
-* Realize that I've got a day job and this class is being used for an app that I'm building on my own time. That app takes the lion's share of my attention. Your bug may not be addressed for weeks or months. I'm sorry, but if this dissatisfies you then please do not download or use this class.
+* Realize that I've got a day job and this class is being used for an app that I'm building on my own time. That app takes the lion's share of my attention. Your bug may not be addressed for weeks or months. I'm sorry, but if this dissatisfies you then please do not use this class.
 
 # API
 
-Your widget must subclass `DragNDropWidget`. Example:
+## Classes:
+* `DragNDropWidget`
+  * the only class in this library. Your draggable widget must subclass this class.
 
-```Python
-class DraggableButton(Button, DragNDropWidget):
-    pass
-```
+## Methods:
+* `drop_func`
+  * this function is called from the object being dropped onto, if it's defined, when a droppable object is dropped onto it.
+* `failed_drop_func`
+  * this function is called from the droppable object, if you release it onto a non-droppable widget.
+* `easy_access_dnd(function_to_do, function_to_do_out, arguments, bind_functions)`
+  * UNTESTED. If you use this, please help complete/update/correct this documentation!
+  * Therefore, I don't know what the purpose of this is. But I do know,
+  * If you call this function, on_motion events are bound to the kivy.core.Window (whatever that is). One of two events may then be dispatched whenever an on_motion event is dispatched: on_motion_over (when the on_motion event takes place inside the widget), or on_motion_out (event is outside the widget).  When assigned functions using this method, the `function_to_do` will be called whenever there is an on_motion_over event. `function_to_do_out` will be called whenever an on_motion_out event occurs. If on_motion_over is utilized, then it is given the arguments `arguments` and `bind_functions`.
 
 ## Properties:
 * `droppable_zone_objects`
