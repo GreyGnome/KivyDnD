@@ -279,7 +279,8 @@ class DragNDropWidget(Widget):
                 anim.bind(on_complete=self.un_root_parent)
                 anim.start(self)
             else:
-                self.failed_drop_func(*self.failed_drop_args)
+                if self.failed_drop_func is not None:
+                    self.failed_drop_func(*self.failed_drop_args)
                 anim = Animation(pos=self._old_drag_pos, duration=self.not_drop_ok_animation_time,
                                  t="in_quad")
                 if self.remove_on_drag:
