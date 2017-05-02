@@ -378,17 +378,23 @@ n                  (This means it left that widget without dispatching on_motion
     def on_drag_start(self, mouse_motion_event):
         if self._drag_started:
             return
-        self._dragged = True
-        if self.drag_start_func is not None:
-            self.drag_start_func(self.drag_start_args)
-        if not self.remove_on_drag:
+        if self.remove_on_drag:
+            self._dragged = True
+            if self.drag_start_func is not None:
+                self.drag_start_func(self.drag_start_args)
+            self.set_drag_start_state()
+            self.root_window = self.parent.get_root_window()
+            self.root_parent(self)
+        else:
             #create copy of object to drag
             copy_of_self = copy.deepcopy(self)
             # We'll handle those variables that are common to ALL d-n-d
             # widgets. The widgets' classes can handle specifics
             # (such as text, etc.)
             self.deepen_the_copy(copy_of_self)
-
+            copy_of_self._dragged = True
+            if copy_of_self.drag_start_func is not None:
+                copy_of_self.drag_start_func(copy_of_self.drag_start_args)
             copy_of_self.set_drag_start_state()
             copy_of_self.root_window = self.parent.get_root_window()
             ## the final child class MUST implement __deepcopy__
@@ -398,10 +404,6 @@ n                  (This means it left that widget without dispatching on_motion
             # self._old_parent.add_widget(copy_of_self, index=self._old_index)
             copy_of_self.root_parent(copy_of_self)
             copy_of_self.pos = self.pos
-        else:
-            self.set_drag_start_state()
-            self.root_window = self.parent.get_root_window()
-            self.root_parent(self)
 
 
     def relative_collide_point(self, x, y):
@@ -421,10 +423,9 @@ n                  (This means it left that widget without dispatching on_motion
             # --- assemble list of possible drag destinations
             # These destinations are based on either drop groups, or simply because
             # they've been added to droppable_zone_objects
-            print "on_drag_finish: DRAGGABLES_DICT:", draggables_dict
+            # print "on_drag_finish: DRAGGABLES_DICT:", draggables_dict
             for drop_group in draggables_dict:
                 if draggables_dict[drop_group].get(self):
-                    print drag_destinations_dict
                     if drop_group in drag_destinations_dict:
                         for drop_recipient in drag_destinations_dict[drop_group]:
                             if not drop_recipient in drag_destination_list:
@@ -447,7 +448,7 @@ n                  (This means it left that widget without dispatching on_motion
                 # TODO ^^^^
                 # TODO: IF object does not subclass DropDestination, it won't have this
                 # TODO: method defined!
-                if obj.relative_collide_point(self.touch_x, self.touch_y):
+                if self.destination_relative_collide_point(obj, self.touch_x, self.touch_y):
                     found_drop_recipients.append(obj)
                     if obj is self._old_parent and not self.can_drop_into_parent:
                         dropped_ok = False
@@ -459,7 +460,7 @@ n                  (This means it left that widget without dispatching on_motion
                 if self.drop_func is not None:
                     self.drop_func(*self.drop_args)
                 for obj in found_drop_recipients:
-                    if obj.drop_func is not None:
+                    if getattr(obj, "drop_func", None) is not None:
                         obj.drop_func(self)
                 anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
                 anim.bind(on_complete=self.un_root_parent)
@@ -476,6 +477,10 @@ n                  (This means it left that widget without dispatching on_motion
                 anim.start(self)
             self._dragged = False
             self.set_drag_finish_state()
+
+    def destination_relative_collide_point(self, widget, x, y):
+        (widget_x, widget_y) = widget.to_window(widget.x, widget.y)
+        return widget_x <= x <= (widget.right + widget_x) and widget_y <= y <= (widget_y + widget.top)
 
     def un_root_parent(self, widget="dumb", anim="dumb2"):
         self.get_root_window().remove_widget(self)
@@ -569,7 +574,7 @@ class DropDestination(Widget):
         # TODO: close all children (they have bound properties, too!
 
     def bind_drop_group(self, arg1, arg2):
-        print "BINDING DROP GROUP"
+        # print "BINDING DROP GROUP"
         if self.drop_group not in drag_destinations_dict:
             drag_destinations_dict[self.drop_group]={}
         drag_destinations_dict[self.drop_group][self]=True
