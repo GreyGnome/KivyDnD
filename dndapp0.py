@@ -78,15 +78,35 @@ class DialogLabel(Label):
     b = NumericProperty(0.5)
     a = NumericProperty(1.0)
     rgba_list = ListProperty([0.5, 0.5, 1.0, 1.0])
+
     def __init__(self, *args, **kwargs):
+        self.toggle_color = True
+        self.i = 0
         super(DialogLabel, self).__init__(**kwargs)
 
+    def flash(self):
+        Clock.schedule_interval(self.cycle_color, 0.3)
+
+    def cycle_color(self, dt):
+        if self.i < 6:
+            if self.toggle_color:
+                print "TOGGLE"
+                self.rgba_list = [0.8, 0.8, 0.0, 1.0]
+                self.toggle_color = False
+            else:
+                print "NORMAL"
+                self.rgba_list = [0.5, 0.5, 0.5, 1.0]
+                self.toggle_color = True
+            self.i += 1
+        else:
+            Clock.unschedule(self.cycle_color)
+            self.i = 0
+            self.toggle_color = True
+            self.parent.remove_widget(self)
 
 class dndapp0(App):
     def __init__(self, **kw):
         super(dndapp0, self).__init__(**kw)
-        self.i = 0
-        self.toggle_color = True
 
     def build(self):
         return Builder.load_string(kv)
@@ -99,28 +119,11 @@ class dndapp0(App):
         :return: 
         '''
         kv_root = arg1
-        self.messagebox = Builder.load_string(kv1)
-        self.messagebox.text = "Dragging done!!!"
+        messagebox = Builder.load_string(kv1)
+        messagebox.text = "Dragging done!!!"
 
-        kv_root.parent.add_widget(self.messagebox)
-        Clock.schedule_interval(self.cycle_color, 0.3)
-
-
-    def cycle_color(self, dt):
-        if self.i < 6:
-            if self.toggle_color:
-                print "TOGGLE"
-                self.messagebox.rgba_list = [0.8, 0.8, 0.0, 1.0]
-                self.toggle_color = False
-            else:
-                print "NORMAL"
-                self.messagebox.rgba_list = [0.5, 0.5, 0.5, 1.0]
-                self.toggle_color = True
-            self.i += 1
-        else:
-            Clock.unschedule(self.cycle_color)
-            self.i = 0
-            self.toggle_color = True
+        kv_root.parent.add_widget(messagebox)
+        messagebox.flash()
 
 
     def oops(self):

@@ -67,6 +67,7 @@ class DragDestinationLabel(Label):
             Clock.unschedule(self.cycle_message)
             self.i = 0
             self.toggle_text = True
+            self.text = "Drag and Drop done!"
 
     def greeter(self, *args):
         self.i = 0
