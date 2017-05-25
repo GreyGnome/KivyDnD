@@ -9,7 +9,7 @@ Meanwhile, the current maintainer (moi!) made a number of other modifications. T
 
 # Version
 
-This is version 0.1. This is Beta software, use at your own peril (or delight?). Previous releases were not versioned.
+This is version 0.2. This is Beta software, use at your own peril (or delight?). Previous releases were not versioned.
 
 # License
 
