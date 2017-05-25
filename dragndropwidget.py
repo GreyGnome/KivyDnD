@@ -17,6 +17,8 @@
 
 # File: DragNDropWidget.py
 #       the drag and drop widget library for Kivy.
+from __future__ import print_function
+
 from kivy.core.window import Window
 from kivy.animation import Animation
 import copy
@@ -259,7 +261,7 @@ class DragNDropWidget(Widget):
                     if drag_destinations_dict.get(drop_group) is not None:
                         for drag_destination in drag_destinations_dict.get(drop_group):
                             if drag_destination.while_dragging_func is not None:
-                                if drag_destination.relative_collide_point(mouse_motion_event.x, mouse_motion_event.y):
+                                if drag_destination.absolute_collide_point(mouse_motion_event.x, mouse_motion_event.y):
                                     drag_destination.while_dragging_func(the_widget, mouse_motion_event)
 
     # DEPRECATED.................................................................
@@ -405,11 +407,11 @@ n                  (This means it left that widget without dispatching on_motion
             copy_of_self.root_parent(copy_of_self)
             copy_of_self.pos = self.pos
 
-
-    def relative_collide_point(self, x, y):
+    def absolute_collide_point(self, x, y):
         (my_x, my_y)=self.to_window(self.x, self.y)
-        # print "relative_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
-        return my_x <= x <= (self.right + my_x) and my_y <= y <= (my_y + self.top)
+        (event_x, event_y) = self.to_window(x, y)
+        # print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
+        return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
 
     def on_drag_finish(self, mouse_motion_event):
         # Don't worry, opacity will be properly set in set_drag_finish_state()
@@ -444,16 +446,29 @@ n                  (This means it left that widget without dispatching on_motion
 
             # --- check which objects did receive this drop
             for obj in drag_destination_list:
-                # print "Check if drop ok: touch:", self.touch_x, self.touch_y, "object:", obj.x, obj.y, obj.right, obj.top
+                (touch_window_x, touch_window_y) = self.to_window(self.touch_x, self.touch_y)
+                # print ("Check if drop ok: touch:", touch_window_x, touch_window_y, "Object's pos in Window:", obj.to_window(obj.x, obj.y), obj.width, obj.height, end=" ")
                 # TODO ^^^^
                 # TODO: IF object does not subclass DropDestination, it won't have this
                 # TODO: method defined!
-                if self.destination_relative_collide_point(obj, self.touch_x, self.touch_y):
+                # if self.widget_absolute_collide_point(obj, self.touch_x, self.touch_y):
+                # TODO: TEST HERE!!!!!!!!!!!!!!!!!!!!
+                if self.widget_absolute_collide_point(obj, touch_window_x, touch_window_y):
+                    # print ("COLLIDE: TRUE:")
+                    try:
+                        # print ("     ...id:", obj.id, "object:", obj, "text:", obj.text)
+                        pass
+                    except AttributeError:
+                        pass
+                        # print ("     ...Missing attributes on object", obj)
                     found_drop_recipients.append(obj)
                     if obj is self._old_parent and not self.can_drop_into_parent:
                         dropped_ok = False
                     else:
                         dropped_ok = True
+                else:
+                    # print ("COLLIDE: FALSE")
+                    pass
             # --- end of check
 
             if dropped_ok:
@@ -478,9 +493,9 @@ n                  (This means it left that widget without dispatching on_motion
             self._dragged = False
             self.set_drag_finish_state()
 
-    def destination_relative_collide_point(self, widget, x, y):
+    def widget_absolute_collide_point(self, widget, x, y):
         (widget_x, widget_y) = widget.to_window(widget.x, widget.y)
-        return widget_x <= x <= (widget.right + widget_x) and widget_y <= y <= (widget_y + widget.top)
+        return widget_x <= x <= (widget.width + widget_x) and widget_y <= y <= (widget_y + widget.height)
 
     def un_root_parent(self, widget="dumb", anim="dumb2"):
         self.get_root_window().remove_widget(self)
@@ -613,7 +628,7 @@ class DropDestination(Widget):
         # print "Self.to_window:", self.to_window(self.x, self.y)
         # TODO: I believe I have compensated for any relative widget, here.
         # TODO: ...but be wary. I'm still not sure about how RelativeLayout will behave.
-        if self.relative_collide_point(motion_xy_tuple[0], motion_xy_tuple[1]):
+        if self.absolute_collide_point(motion_xy_tuple[0], motion_xy_tuple[1]):
             # print motionevent[0], on_[1], "pointer collides DropDestination:", self
             if self.in_me:
                 self.dispatch("on_motion_inside", motion_xy_tuple)
@@ -628,10 +643,11 @@ class DropDestination(Widget):
             else:
                 self.dispatch("on_motion_outside", motion_xy_tuple)
 
-    def relative_collide_point(self, x, y):
+    def absolute_collide_point(self, x, y):
         (my_x, my_y)=self.to_window(self.x, self.y)
-        # print "relative_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
-        return my_x <= x <= (self.right + my_x) and my_y <= y <= (my_y + self.top)
+        (event_x, event_y) = self.to_window(x, y)
+        # print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
+        return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
 
     def on_motion_flee(self, motion_xy_tuple):
         """

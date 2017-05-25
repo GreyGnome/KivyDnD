@@ -13,10 +13,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# File: dndapp0.py
+# File: app_copy_draggable.py
 #       Simple example of the DragNDropWidget Kivy library.
-#       Exercises some basic features of the library: setting droppable_zone_objects,
-#       drop_ok_animation_time, drop_func and failed_drop_func.
+#       Expands on dndapp0.py. Additional features of the library:
+#       * Copy the draggable widget, instead of removing it from the parent.
+#       * Can drop onto the original's parent
+#       * The parent has a drop_func defined
+
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -42,12 +45,14 @@ FloatLayout:
 
         DraggableButton:
             text: 'Button 1'
-            droppable_zone_objects: [upper_to_box]
+            droppable_zone_objects: [upper_to_box, from_box]
             drop_ok_animation_time: 1.5
             drop_func: app.greet
             drop_args: [ root, self ]
             failed_drop_func: app.oops
             failed_drop_args: [ root, self ]
+            remove_on_drag: False
+            can_drop_into_parent: True
 
     DragDestinationLabel:
         id: upper_to_box
@@ -77,7 +82,6 @@ DialogLabel:
 '''
 
 class DialogLabel(Label):
-
 
     def __init__(self, *args, **kwargs):
         self.toggle_color = True
