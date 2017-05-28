@@ -59,7 +59,7 @@ FloatLayout:
             id: draggable_button
             text: 'Button 1'
             droppable_zone_objects: [left_label, relative_left_label, relative_right_label, from_box]
-            drop_ok_animationn_time: 1.5
+            drop_ok_animation_time: 1.5
             drop_func: app.greet
             drop_args: [ root, self ]
             failed_drop_func: self.oops
