@@ -472,14 +472,21 @@ n                  (This means it left that widget without dispatching on_motion
             # --- end of check
 
             if dropped_ok:
+                do_animation = True
                 if self.drop_func is not None:
                     self.drop_func(*self.drop_args)
+                # TODO: Looping over a bunch of objects (potentially), but the very first
+                # TODO: one that is self's parent may make the animation False.
+                # TODO: Decide if there can be one or more than one drop recipient.
                 for obj in found_drop_recipients:
                     if getattr(obj, "drop_func", None) is not None:
                         obj.drop_func(self)
-                anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
-                anim.bind(on_complete=self.un_root_parent)
-                anim.start(self)
+                    if obj == self.parent:
+                        do_animation = False
+                if do_animation:
+                    anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
+                    anim.bind(on_complete=self.un_root_parent)
+                    anim.start(self)
             else:
                 if self.failed_drop_func is not None:
                     self.failed_drop_func(*self.failed_drop_args)
