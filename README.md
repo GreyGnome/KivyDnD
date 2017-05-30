@@ -113,14 +113,13 @@ In addition to the simple usage given above, the module has additional capabilit
 There are a number of Kivy Properties available.
 # Additional Capabilities and Notes:
 
-You can have a number of widgets stacked on top of each other as drop recipients.
-
-If you cover a drop destination widget with another widget that is not a
-drop destination, that widget will prevent the underlying drop
-destination from receiving a drop anywhere in the rectangle coordinates
-of the covering widget.
+At the end of a drop, the widget is left with no parent. It is up to you to decide what to do with the widget. So if you want to add the dragged widget onto the place on which it was dropped, you should do so in drop_func() of the recipient.
 
 ---
+# Known Issues
+
+You can have a number of widgets stacked on top of each other as drop recipients, but only one is chosen as the drop recipient, and it's undefined which widget will get chosen first. Caveat Programmer. If you have a situation where a number of widgets may get stacked and you want ALL of them to be chosen when dropped upon, send me an email and let me know this is functionality that you need.
+
 # Bugs
 
 Besides the ones I don't know about:
