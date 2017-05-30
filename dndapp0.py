@@ -78,7 +78,6 @@ DialogLabel:
 
 class DialogLabel(Label):
 
-
     def __init__(self, *args, **kwargs):
         self.toggle_color = True
         self.i = 0
@@ -89,7 +88,6 @@ class DialogLabel(Label):
         Clock.schedule_interval(self.cycle_color, 0.3)
 
     def cycle_color(self, dt):
-        print self.rgba_list
         if self.i < 6:
             if self.toggle_color:
                 # toggled color
@@ -128,7 +126,6 @@ class dndapp0(App):
         messagebox.flash()
 
     def oops(self, arg1=None, arg2=None):
-        print "Self, arg1, arg2:", self, arg1, arg2
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Ooops! Can't drop there!"
 
