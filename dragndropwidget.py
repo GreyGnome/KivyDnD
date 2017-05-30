@@ -418,7 +418,7 @@ n                  (This means it left that widget without dispatching on_motion
         # after the animation
         self.opacity = 1.0
         drag_destination_list = []
-        found_drop_recipients = []
+        found_drop_recipient = None
         # del self.drop_recipients[:]
         if self._dragged and self._draggable:
             dropped_ok = False
@@ -444,7 +444,11 @@ n                  (This means it left that widget without dispatching on_motion
                 # print "Possible drop destination:", obj
             # --- end of assemble list
 
-            # --- check which objects did receive this drop
+            # --- check which object did receive this drop. Note that only the first
+            # widget found is returned (though this can be changed in the future, if need
+            # be. But it would require some careful thought, and perhaps a dropped_ok
+            # variable to be associated with each possible drop recipient... with some of
+            # them getting True, but others False (perhaps).
             for obj in drag_destination_list:
                 (touch_window_x, touch_window_y) = self.to_window(self.touch_x, self.touch_y)
                 # print ("Check if drop ok: touch:", touch_window_x, touch_window_y, "Object's pos in Window:", obj.to_window(obj.x, obj.y), obj.width, obj.height, end=" ")
@@ -452,7 +456,6 @@ n                  (This means it left that widget without dispatching on_motion
                 # TODO: IF object does not subclass DropDestination, it won't have this
                 # TODO: method defined!
                 # if self.widget_absolute_collide_point(obj, self.touch_x, self.touch_y):
-                # TODO: TEST HERE!!!!!!!!!!!!!!!!!!!!
                 if self.widget_absolute_collide_point(obj, touch_window_x, touch_window_y):
                     # print ("COLLIDE: TRUE:")
                     try:
@@ -461,32 +464,32 @@ n                  (This means it left that widget without dispatching on_motion
                     except AttributeError:
                         pass
                         # print ("     ...Missing attributes on object", obj)
-                    found_drop_recipients.append(obj)
-                    if obj is self._old_parent and not self.can_drop_into_parent:
+                    found_drop_recipient = (obj)
+                    if found_drop_recipient is self._old_parent and not self.can_drop_into_parent:
                         dropped_ok = False
                     else:
                         dropped_ok = True
+                    break
                 else:
                     # print ("COLLIDE: FALSE")
                     pass
             # --- end of check
 
             if dropped_ok:
-                do_animation = True
+                if found_drop_recipient == self._old_parent:
+                    print ("Dropping onto parent; no animation")
+                    self.un_root_parent(self)
+                else:
+                    anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
+                    anim.bind(on_complete=self.un_root_parent)
+                    anim.start(self)
                 if self.drop_func is not None:
                     self.drop_func(*self.drop_args)
                 # TODO: Looping over a bunch of objects (potentially), but the very first
                 # TODO: one that is self's parent may make the animation False.
                 # TODO: Decide if there can be one or more than one drop recipient.
-                for obj in found_drop_recipients:
-                    if getattr(obj, "drop_func", None) is not None:
-                        obj.drop_func(self)
-                    if obj == self.parent:
-                        do_animation = False
-                if do_animation:
-                    anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
-                    anim.bind(on_complete=self.un_root_parent)
-                    anim.start(self)
+                if getattr(found_drop_recipient, "drop_func", None) is not None:
+                    found_drop_recipient.drop_func(self)
             else:
                 if self.failed_drop_func is not None:
                     self.failed_drop_func(*self.failed_drop_args)
@@ -497,15 +500,18 @@ n                  (This means it left that widget without dispatching on_motion
                 else:
                     anim.bind(on_complete = self.un_root_parent)
                 anim.start(self)
+            # print ("Drag finished, parent:", self.parent)
             self._dragged = False
-            self.set_drag_finish_state()
+            self.set_drag_finish_state() # Simply resets some flags, and returns opacity to original
 
     def widget_absolute_collide_point(self, widget, x, y):
         (widget_x, widget_y) = widget.to_window(widget.x, widget.y)
         return widget_x <= x <= (widget.width + widget_x) and widget_y <= y <= (widget_y + widget.height)
 
     def un_root_parent(self, widget="dumb", anim="dumb2"):
+        # print ("Unroot: ", self.parent)
         self.get_root_window().remove_widget(self)
+        # print ("unroot done, parent: ", self.parent)
 
     def on_being_dragged(self):
         pass
