@@ -22,6 +22,8 @@ Created on Oct 24, 2012
 '''
 
 
+from __future__ import print_function
+
 from dragndropwidget import DragNDropWidget
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -46,11 +48,11 @@ class DraggableButton(Button, DragNDropWidget):
         return DraggableButton(text=self.text)
 
     def greet(self, object):
-        print "greetings from DROPBUTTON"
+        print ("greetings from DROPBUTTON")
 
     def oops(self, root, app):
         app.oops(root, app)
-        print "OOOPS!!!"
+        print ("OOOPS!!!")
 
 class DragDestinationLabel(Label):
     def __init__(self, *args, **kwargs):
@@ -96,11 +98,10 @@ class DragDestinationBoxLayout(BoxLayout):
 
 class DragSourceBoxLayout(BoxLayout):
     def on_touch_down(self, touch):
-        print "BOXLAYOUT GOT TOUCHED!", str(self)
         super (DragSourceBoxLayout, self).on_touch_down(touch)
 
     def drop_func(self, arg1):
-        print "drop_func: Dropped here", arg1
-        arg1.parent.remove_widget(arg1)
+        print ("Arg1:", arg1, "parent:", arg1.parent)
+        print ("drop_func: Dropped here", self)
         self.add_widget(arg1)
         arg1.opacity = 1.0
