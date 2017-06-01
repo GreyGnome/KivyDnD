@@ -118,7 +118,7 @@ At the end of a drop, the widget is left with no parent. It is up to you to deci
 ---
 # Known Issues
 
-You can have a number of widgets stacked on top of each other as drop recipients, but only one is chosen as the drop recipient, and it's undefined which widget will get chosen first. Caveat Programmer. If you have a situation where a number of widgets may get stacked and you want ALL of them to be chosen when dropped upon, send me an email and let me know this is functionality that you need.
+You can have a number of widgets stacked on top of each other as drop recipients, but it's undefined which widget will get chosen first.
 
 # Bugs
 
