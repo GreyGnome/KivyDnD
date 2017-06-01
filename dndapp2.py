@@ -18,7 +18,7 @@
 
 from kivy.app import App
 from kivy.lang import Builder
-import DraggableButton  # import to get auto register
+import draggablestuff  # import to get auto register
 from kivy.clock import Clock
 
 kv = '''
