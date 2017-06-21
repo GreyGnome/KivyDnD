@@ -52,6 +52,14 @@ class DraggableButton(Button, DragNDropWidget):
     def oops(self):
         print ("OOOPS!!! from DraggableButton")
 
+    def on_successful_drop(self, animation=None, widget=None):
+        super(DraggableButton, self).on_successful_drop(animation, widget)
+        print ("DraggableButton: on_successful_drop")
+
+    def on_unsuccessful_drop(self, animation=None, widget=None):
+        super(DraggableButton, self).on_unsuccessful_drop(animation, widget)
+        print ("DraggableButton: on_unsuccessful_drop")
+
 class DragDestinationLabel(Label):
     def __init__(self, *args, **kwargs):
         super(DragDestinationLabel, self).__init__(**kwargs)

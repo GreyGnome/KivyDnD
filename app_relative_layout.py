@@ -20,7 +20,7 @@
 # in the destination widgets.
 
 # File: app_relative_layout.py
-
+from __future__ import print_function
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -29,6 +29,7 @@ from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.factory import Factory
 from kivy.properties import NumericProperty, ListProperty
+
 
 # Classes in the FloatLayout are defined in DraggableButton.py, included above.
 kv = '''
@@ -122,33 +123,6 @@ DialogLabel:
     pos_hint: {'x': 0.3, 'y': 0.55}
 '''
 
-class DialogLabel(Label):
-
-    def __init__(self, *args, **kwargs):
-        self.toggle_color = True
-        self.i = 0
-        super(DialogLabel, self).__init__(**kwargs)
-
-    def flash(self):
-        self.rgba_list_orig = self.rgba_list
-        Clock.schedule_interval(self.cycle_color, 0.3)
-
-    def cycle_color(self, dt):
-        if self.i < 6:
-            if self.toggle_color:
-                # toggled color
-                self.rgba_list = [0.8, 0.8, 0.0, 1.0]
-                self.toggle_color = False
-            else:
-                # normal color
-                self.rgba_list = self.rgba_list_orig
-                self.toggle_color = True
-            self.i += 1
-        else:
-            Clock.unschedule(self.cycle_color)
-            self.i = 0
-            self.toggle_color = True
-            self.parent.remove_widget(self)
 
 class app_relative_layout(App):
     def __init__(self, **kw):
@@ -164,6 +138,7 @@ class app_relative_layout(App):
         :param arg2: the widget that calls this method
         :return: 
         '''
+        print ("App.greet()...")
         kv_root = arg1
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Dragging done!!!"

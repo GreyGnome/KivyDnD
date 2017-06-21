@@ -54,6 +54,15 @@ class DraggableButton(Button, DragNDropWidget):
         app.oops(root, app)
         print ("OOOPS!!!")
 
+    def on_successful_drop(self, arg1=None, arg2=None):
+        super (DraggableButton, self).on_successful_drop()
+        print ("on_successful_drop: Run overridden method")
+
+    def on_unsuccessful_drop(self, arg1=None, arg2=None):
+        # super (DraggableButton, self).on_unsuccessful_drop(arg1, arg2)
+        print ("on_unsuccessful_drop: Run overridden method")
+
+
 class DragDestinationLabel(Label):
     def __init__(self, *args, **kwargs):
         super(DragDestinationLabel, self).__init__(**kwargs)
@@ -78,6 +87,7 @@ class DragDestinationLabel(Label):
             self.text = "Drag and Drop done!"
 
     def greeter(self, *args):
+        print ("DragDestinationLabel.greeter()")
         self.i += 1
         self.toggle_text = True
         self.initial_text = self.text
@@ -97,11 +107,57 @@ class DragDestinationBoxLayout(BoxLayout):
 
 
 class DragSourceBoxLayout(BoxLayout):
-    def on_touch_down(self, touch):
-        super (DragSourceBoxLayout, self).on_touch_down(touch)
+    def __init__(self, *args, **kwargs):
+        super(DragSourceBoxLayout, self).__init__(**kwargs)
+        self.last_touch_up_time=0
 
-    def drop_func(self, arg1):
-        print ("Arg1:", arg1, "parent:", arg1.parent)
-        print ("drop_func: Dropped here", self)
-        self.add_widget(arg1)
-        arg1.opacity = 1.0
+    def on_touch_down(self, touch):
+        super(DragSourceBoxLayout, self).on_touch_down(touch)
+
+    def on_touch_up(self, touch):
+        '''Receive a touch up event. The touch is in parent coordinates.
+
+        See :meth:`on_touch_down` for more information.
+        '''
+        print ("--- START START START TOUCH UP --- on_touch_up: DragSourceBoxLayout", self, "Kids:", self.children)
+        print ("touch start:", touch.time_start)
+        super(DragSourceBoxLayout, self).on_touch_up(touch)
+
+
+    def post_drop_func(self, arg1):
+        print ("DragSourceBoxLayout:post_drop_func: TODO: HOW to get this copied widget to parent here...?")
+        print ("DragSourceBoxLayout:post_drop_func: Arg1:", arg1, "parent:", arg1.parent)
+        print ("DragSourceBoxLayout:post_drop_func: Dropped here", self)
+        # TODO: This is not right. What am I trying to do here?
+        if arg1.parent == None:
+            self.add_widget(arg1)
+        arg1.opacity = 1.0 # Because the animation makes it disappear
+
+
+class DialogLabel(Label):
+
+    def __init__(self, *args, **kwargs):
+        self.toggle_color = True
+        self.i = 0
+        super(DialogLabel, self).__init__(**kwargs)
+
+    def flash(self):
+        self.rgba_list_orig = self.rgba_list
+        Clock.schedule_interval(self.cycle_color, 0.3)
+
+    def cycle_color(self, dt):
+        if self.i < 6:
+            if self.toggle_color:
+                # toggled color
+                self.rgba_list = [0.8, 0.8, 0.0, 1.0]
+                self.toggle_color = False
+            else:
+                # normal color
+                self.rgba_list = self.rgba_list_orig
+                self.toggle_color = True
+            self.i += 1
+        else:
+            Clock.unschedule(self.cycle_color)
+            self.i = 0
+            self.toggle_color = True
+            self.parent.remove_widget(self)
