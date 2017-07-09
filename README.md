@@ -9,7 +9,7 @@ Meanwhile, the current maintainer (moi!) made a number of other modifications. T
 
 # Version
 
-This is version 0.2. This is Beta software, use at your own peril (or delight?). Previous releases were not versioned.
+This is version 0.3. This is Beta software, use at your own peril (or delight?). Previous releases were not versioned.
 
 # License
 
@@ -54,18 +54,22 @@ Finally,
 * `DropDestination`
   * This is designed to be optional. This is an object that receives a DragNDropWidget. Use this if you want to:
     * Have the destination perform actions while an item is being dragged or dropped, or
-    * Organize widgets into "drop groups", meaning that certain widgets are restricted to being dropped only onto other widgets in their group.
+    * Organize widgets into "drop groups", meaning that certain widgets are restricted to being dropped only onto other widgets in a group.
 
 ## DragNDropWidget
 ### Methods
-These are all ObjectProperties (the methods) or ListProperties (the args). Each Method has a ListProperty that accompanies it, named with an "args" suffix rather than "func". For example, `failed_drop_func` has `failed_drop_args` and so on. The one exception is `while_dragging_func`; there is no `while_dragging_args`.
+The following are all ObjectProperties (the methods) or ListProperties (the args). Each Method has a ListProperty that accompanies it, named with an "args" suffix rather than "func", as shown below. For example, `failed_drop_func` has `failed_drop_args`. The one exception is `while_dragging_func`; there is no `while_dragging_args`.
+
+Note that the first argument for each function after self is the widget that called it. This is built in to the library.
 * `drop_func`
   * If defined in your DragNDropWidget subclass, this function is called on a successful drop.
   * If defined in the object being dropped onto, a function by this name will be called when a droppable object is dropped onto it.
+  * Argument ListProperty: `drop_args`. Your function will be called with the following arguments: self, the calling widget, and then the arguments in the ListProperty.
 * `while_dragging_func`
   * If set, this is called continuously as the widget is being dragged.
 * `failed_drop_func`
-  * If defined in your DragNDropWidget subclass, this function will be called if you drop it onto a non-droppable widget. It's also called if you drop the DragNDropWidget onto its old parent and `can_drop_into_parent` is `False`.
+  * If defined in your DragNDropWidget subclass, this function will be called if you drag but fail to drop it onto any widget that has been configured to receive a drop from this widget.
+  * Argument ListProperty: `failed_drop_args`
 
 If you assign any of these `on_motion_...` functions, on_motion events are bound to the kivy.core.Window (the main Window that encloses your Kivy program). on_motion events are dispatched with each move of the pointer.
 
@@ -86,6 +90,38 @@ Subsequently, one of three events may then be dispatched by an on_motion event, 
   * The name of a function that will be called upon a successful drop.
 * `failed_drop_func`
   * The name of a function that will be called upon an unsuccessful drop.
+
+### Called After a Drop
+At the end of a drag, and drop, the `on_drag_finish()` method is called. Its job is to find any possible drag recipients, decide if there was a successful drop and who was dropped onto, and then call the appropriate user-defined functions. It may then call the ending animation. Finally, it performs cleanup. The order of methods called from `on_drag_finish()` is as follows:
+
+* If there was at least one successful drop:
+ * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation. Then:
+  * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more recipients.
+   * Call `self.drop_func()`, if defined.
+   * Call `found_drop_recipient.drop_func(self)` for each successful drop recipient, if defined.
+  * Call `post_successful_animation()` after the widget's animation is finished.
+ * If we set the Property to False, we do not want an animation:
+  * Call `on_successful_drop()` immediately.
+   * Calls `self.drop_func()` and `found_drop_recipient.drop_func(self)` as described above.
+  * Call `post_successful_animation()` (which is a misnomer in this case).
+
+`post_successful_animation()` is where you want to put behaviors such as adding a dragged widget to a new parent. You can override this method in a subclass of DragNDropWidget.
+
+* If there was not any successful drop:
+ * If the `not_drop_ok_do_animation` Property is True (the default), we want an Animation.
+  * Call `on_unsuccessful_drop()`. This is called once even no matter how many widgets we were unsuccessful in dropping onto.
+   * Call `self.failed_drop_func()`, if defined.
+   * If `self.remove_on_drag` is True (the default),
+    * Call `self.reborn()`, which removes the widget from the root Window and readds it to the original parent.
+   * else,
+    * Calls `self.un_root_and_close()`, which removes the widget from the root Window and destroys it (because it is a copy of the original DragNDropWidget).
+  * Call `self.post_unsuccessful_animation()` after the Animation is finished, which simply sets the widget's old opacity.
+ * If we set the Property to False, we do not want an Animation.
+  * Call `on_unsuccessful_drop()` as above.
+   * Call its submethods, as above.
+  * Call `self.post_unsuccessful_animation()` as above, which simply sets the widget's old opacity.
+
+############## TODO: test app_relative_layout.py ########################################
 
 ### Properties:
 * `droppable_zone_objects`
