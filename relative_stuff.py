@@ -43,6 +43,7 @@ class DraggableButton(Button, DragNDropWidget):
         #Button.__init__(self, **kw)
         super(DraggableButton, self).__init__(**kw)
         self.size_hint = (None, None)
+        self.text=hex(id(self))
 
     def __deepcopy__(self, dumb):
         return DraggableButton(text=self.text)
@@ -50,8 +51,9 @@ class DraggableButton(Button, DragNDropWidget):
     def greet(self, object):
         print ("greetings from DROPBUTTON")
 
-    def oops(self, root, app):
-        app.oops(root, app)
+    def oops(self, calling_widget, kv_root, app):
+        print ("oops() Args:", self, calling_widget, kv_root, app)
+        app.oops(calling_widget, kv_root, app)
         print ("OOOPS!!!")
 
     def on_successful_drop(self, arg1=None, arg2=None):
@@ -59,7 +61,7 @@ class DraggableButton(Button, DragNDropWidget):
         print ("on_successful_drop: Run overridden method")
 
     def on_unsuccessful_drop(self, arg1=None, arg2=None):
-        # super (DraggableButton, self).on_unsuccessful_drop(arg1, arg2)
+        super (DraggableButton, self).on_unsuccessful_drop(arg1, arg2)
         print ("on_unsuccessful_drop: Run overridden method")
 
 
