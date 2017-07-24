@@ -27,9 +27,9 @@ from dragndropwidget import DragNDropWidget
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.relativelayout import RelativeLayout
 from kivy.clock import Clock
-
+from debug_print import Debug
+debug=Debug(False)
 
 class DraggableButton(Button, DragNDropWidget):
     '''
@@ -42,23 +42,29 @@ class DraggableButton(Button, DragNDropWidget):
         #Button.__init__(self, **kw)
         super(DraggableButton, self).__init__(**kw)
         self.size_hint = (None, None)
+        Clock.schedule_interval(self.show_parent, 2)
 
     def __deepcopy__(self, dumb):
         return DraggableButton(text=self.text)
 
-    def greet(self, object):
+    def greet(self, arg1, arg2):
         print ("greetings from DraggableButton")
 
-    def oops(self):
+    def oops(self, arg1):
         print ("OOOPS!!! from DraggableButton")
 
-    def on_successful_drop(self, animation=None, widget=None):
-        super(DraggableButton, self).on_successful_drop(animation, widget)
-        print ("DraggableButton: on_successful_drop")
+    def on_successful_drop(self):
+        super(DraggableButton, self).on_successful_drop()
+        debug.print ("DraggableButton: on_successful_drop")
 
-    def on_unsuccessful_drop(self, animation=None, widget=None):
-        super(DraggableButton, self).on_unsuccessful_drop(animation, widget)
-        print ("DraggableButton: on_unsuccessful_drop")
+#    def on_unsuccessful_drop(self, arg1):
+#        super(DraggableButton, self).on_unsuccessful_drop()
+#        print ("DraggableButton: on_unsuccessful_drop")
+
+    def show_parent(self, delta_time):
+        if self.parent == None:
+            debug.print ("DraggableButton", self, "not visible but certainly not gone!")
+
 
 class DragDestinationLabel(Label):
     def __init__(self, *args, **kwargs):
@@ -95,7 +101,7 @@ class DragSourceBoxLayout(BoxLayout):
         super (DragSourceBoxLayout, self).on_touch_down(touch)
 
     def drop_func(self, arg1):
-        print ("drop_func: Dropped here", arg1)
+        debug.print ("drop_func: Dropped here", arg1)
         arg1.parent.remove_widget(arg1)
         self.add_widget(arg1)
         arg1.opacity = 1.0
