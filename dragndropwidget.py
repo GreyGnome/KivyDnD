@@ -26,6 +26,8 @@ from kivy.uix.widget import Widget
 from kivy.properties import (
     ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
 import traceback
+from debug_print import Debug
+debug = Debug(True) # Is False by default.
 
 # This looks like:
 # dictionary[drag_group][widget] = true
@@ -95,6 +97,7 @@ class DragNDropWidget(Widget):
         self.max_x = -1
         self.max_y = -1
         self.move_counter = 0
+        self.touch_up_event_start = 0
 
     def close(self):
         """
@@ -168,7 +171,7 @@ class DragNDropWidget(Widget):
         # TODO: (after current debugging on 6/17/17)
         if set_opacity:
             self.opacity = self._old_opacity
-        print (" ****************** DRAG N DROP TOTALLY DONE *********************")
+        debug.print (" ****************** DRAG N DROP TOTALLY DONE *********************")
 
     def set_bound_axis_positions(self):
         for obj in self.bound_zone_objects:
@@ -207,7 +210,7 @@ class DragNDropWidget(Widget):
                 self.am_touched = True
                 if touch.is_double_tap:
                     self.is_double_tap = True
-                    print ("DOUBLE TAPPED THIS ONE!", self)
+                    debug.print ( "DOUBLE TAPPED THIS ONE!", self)
 
     def on_touch_up(self, mouse_motion_event):
         """
@@ -217,28 +220,33 @@ class DragNDropWidget(Widget):
         :return:
         """
         #if self.collide_point(mouse_motion_event.x, mouse_motion_event.y) and self._draggable:
-        print ("***                 on_touch_up                ***")
-        print ("***                 DragNDropWidget")
-        print ("***  on_touch_up: self:", self, "copy:", self.copy, "parent:", self.parent)
-        print ("***  id:", hex(id(self)))
-        print ("***  am_touched:", self.am_touched, "is_double_tap:", self.is_double_tap)
-        print ("***  was dragged?", self._dragged, "event:", mouse_motion_event.__repr__())
-        print ("***                 on_touch_up                ***")
+        debug.print ("***                 DragNDropWidget")
+        debug.print ("***  on_touch_up: self:", self, "copy:", self.copy, "parent:", self.parent)
+        debug.print ("***  id:", hex(id(self)))
+        debug.print ("***  am_touched:", self.am_touched, "is_double_tap:", self.is_double_tap)
+        debug.print ("***  was dragged?", self._dragged, "event:", mouse_motion_event.__repr__())
+        debug.print ("***                 on_touch_up                ***")
+        debug.print ("***  Mouse Motion Event:", mouse_motion_event)
+        # We if a widget is reborn, this event may be called a second time. Don't do that.
+        if self.touch_up_event_start == mouse_motion_event.time_start:
+            return
+        self.touch_up_event_start = mouse_motion_event.time_start
+
         if self.is_double_tap and not self._dragged:
-            print ("on_touch_up: DOUBLE TAP AND NOT DRAGGED")
+            debug.print ("on_touch_up: DOUBLE TAP AND NOT DRAGGED")
             self.set_drag_finish_state()
             return
         self.am_touched = False
         if self._draggable and self._dragged:
-            print ("on_touch_up: DRAGGED!!!!!!!")
+            debug.print ("on_touch_up: DRAGGED!!!!!!!")
             self.touch_x = mouse_motion_event.x
             self.touch_y = mouse_motion_event.y
-            print ('self.dispatch("on_drag_finish", mouse_motion_event) *******************************')
+            debug.print ('dispatch "on_drag_finish", mouse_motion_event) *******************************')
             self.dispatch("on_drag_finish", mouse_motion_event)
             # TODO: Is this right? How do I send on_touch_up after
             # TODO: a double tap?
         else:
-            print ("on_touch_up: NOT DRAGGED")
+            debug.print ("on_touch_up: NOT DRAGGED")
             self.set_drag_finish_state()
     # TODO: LOOK ALL OVER FOR DISPATCH, AND SEND COORDS
 
@@ -257,7 +265,7 @@ class DragNDropWidget(Widget):
             the_widget._dragged = True
             x = mouse_motion_event.x - the_widget.touch_offset_x
             y = mouse_motion_event.y - the_widget.touch_offset_y
-            # print ("on_touch_move: widget pos:", x, y, "parent:", the_widget.parent)
+            # debug.print ("on_touch_move: widget pos:", x, y, "parent:", the_widget.parent)
 
             if the_widget.min_x != -1:
                 if x <= the_widget.min_x:
@@ -353,7 +361,7 @@ n                  (This means it left that widget without dispatching on_motion
             # self.easy_access_dnd_function_binds)
         else:
             pass
-            # print "FUNCTION MOTION FLEE NONE"
+            # debug.print "FUNCTION MOTION FLEE NONE"
         DragNDropWidget.widget_entered = None
 
     def on_motion_over(self, motion_xy_tuple):
@@ -366,7 +374,7 @@ n                  (This means it left that widget without dispatching on_motion
                 # self.easy_access_dnd_function_binds)
         else:
             pass
-            # print "FUNCTION MOTION OVER NONE"
+            # debug.print "FUNCTION MOTION OVER NONE"
 
     def on_motion_outside(self, motion_xy_tuple):
         try:
@@ -374,7 +382,7 @@ n                  (This means it left that widget without dispatching on_motion
                 self.motion_outside_widget_func(self, self.motion_outside_widget_args)
             else:
                 pass
-                # print "FUNCTION OUT NONE"
+                # debug.print "FUNCTION OUT NONE"
         except AttributeError:
             pass
 
@@ -435,17 +443,16 @@ n                  (This means it left that widget without dispatching on_motion
     def absolute_collide_point(self, x, y):
         (my_x, my_y)=self.to_window(self.x, self.y)
         (event_x, event_y) = self.to_window(x, y)
-        # print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
+        # debug.print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
         return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
 
     def on_drag_finish(self, mouse_motion_event):
         # Don't worry, opacity will be properly set in set_drag_finish_state()
         # after the animation
-        print ("on_drag_finish: ================================================================")
-        print ("I will call on_successful_drop")
-        print ("on_drag_finish, beginning, parent:", self.parent, "copy?", self.copy)
-        print ("self:", self, "is_double_tap?", self.is_double_tap)
-        print ("on_drag_finish: ================================================================")
+        debug.print ("on_drag_finish: ================================================================")
+        debug.print ("on_drag_finish, beginning, parent:", self.parent, "copy?", self.copy)
+        debug.print ("self:", self, "is_double_tap?", self.is_double_tap)
+        debug.print ("on_drag_finish: ================================================================")
         self.opacity = 1.0
         drag_destination_list = []
         self.found_drop_recipients_ok_dict = {}
@@ -455,7 +462,7 @@ n                  (This means it left that widget without dispatching on_motion
             # --- assemble list of possible drag destinations
             # These destinations are based on either drop groups, or simply because
             # they've been added to droppable_zone_objects
-            # print "on_drag_finish: DRAGGABLES_DICT:", draggables_dict
+            # debug.print "on_drag_finish: DRAGGABLES_DICT:", draggables_dict
             for drop_group in draggables_dict:
                 if draggables_dict[drop_group].get(self):
                     if drop_group in drag_destinations_dict:
@@ -471,26 +478,26 @@ n                  (This means it left that widget without dispatching on_motion
                 if not obj in drag_destination_list:
                     drag_destination_list.append(obj)
             #for obj in drag_destination_list:
-            #    print ("Possible drop destination:", obj.text)
+            #    debug.print ("Possible drop destination:", obj.text)
             # --- end of assemble list
 
             # -------------------------------------------------------------------------
             # --- check which object(s) did receive this drop.
             for obj in drag_destination_list:
                 (touch_window_x, touch_window_y) = self.to_window(self.touch_x, self.touch_y)
-                print ("Check if drop ok: touch:", touch_window_x, touch_window_y, "Object's pos in Window:", obj.to_window(obj.x, obj.y), obj.width, obj.height, end=" ")
+                debug.print ("Check if drop ok: touch:", touch_window_x, touch_window_y, "Object's pos in Window:", obj.to_window(obj.x, obj.y), obj.width, obj.height, end=" ")
                 # TODO: IF object does not subclass DropDestination, it won't have this
                 # TODO: method defined!
                 if self.widget_absolute_collide_point(obj, touch_window_x, touch_window_y):
-                    print ("COLLIDE: True", end=" ")
+                    debug.print ("COLLIDE: True", end=" ")
                     if obj is self._old_parent and not self.can_drop_into_parent:
                         self.found_drop_recipients_ok_dict[obj] = False
-                        print ("OK: False")
+                        debug.print ("OK: False")
                     else:
                         self.found_drop_recipients_ok_dict[obj] = True
-                        print ("OK: True")
+                        debug.print ("OK: True")
                 else:
-                    print ("COLLIDE: False")
+                    debug.print ("COLLIDE: False")
                     pass
             # --- end of check
 
@@ -509,7 +516,7 @@ n                  (This means it left that widget without dispatching on_motion
 
             # -------------------------------------------------------------------------
             for found_drop_recipient, dropped_ok in self.found_drop_recipients_ok_dict.items():
-                print ("Drop Recipient:", found_drop_recipient, dropped_ok)
+                debug.print ("Drop Recipient:", found_drop_recipient, dropped_ok)
                 if dropped_ok:
                     not_drop_ok_do_animation = False
                     got_one_successful_drop = True
@@ -528,6 +535,7 @@ n                  (This means it left that widget without dispatching on_motion
             # -------------------------------------------------------------------------
             # Perform after-drop functions
             if got_one_successful_drop:
+                debug.print("I will call on_successful_drop")
                 if drop_ok_do_animation:
                     anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
                     anim.bind(on_complete=self.post_successful_animation)
@@ -540,7 +548,7 @@ n                  (This means it left that widget without dispatching on_motion
             else:
                 # TODO: Do we want to run the animation? MIKE check this... is it right
                 # TODO: to be here???
-                print ("on_drag_finish:, no successful drop!")
+                debug.print ("on_drag_finish:, I will call on_unsuccessful_drop")
                 if not_drop_ok_do_animation:
                     anim = Animation(pos=self._old_drag_pos,
                                      duration=self.not_drop_ok_animation_time, t="in_quad")
@@ -549,36 +557,10 @@ n                  (This means it left that widget without dispatching on_motion
                     self.on_unsuccessful_drop()
                 else:
                     self.on_unsuccessful_drop()
-                    self.post_unsuccessful_animation()
+                    self.post_unsuccessful_animation(False)  # Simply resets some flags; opacity will be set after the animation
             # On a successful drop, the widget will end up with no parent whatsoever.
 
-            # old code that worked only for a single found drop recipient...
-            #if dropped_ok:
-            #    if found_drop_recipient == self._old_parent:
-            #        print ("Dropping onto parent; no animation")
-            #        self.un_root_me(self)
-            #    else:
-            #        anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
-            #        anim.bind(on_complete=self.un_root_me)
-            #        anim.start(self)
-            #    if self.drop_func is not None:
-            #        self.drop_func(*self.drop_args)
-            #    # TODO: Looping over a bunch of objects (potentially), but the very first
-            #    # TODO: one that is self's parent may make the animation False.
-            #    # TODO: Decide if there can be one or more than one drop recipient.
-            #    if getattr(found_drop_recipient, "drop_func", None) is not None:
-            #        found_drop_recipient.drop_func(self)
-            #else:
-            #    if self.failed_drop_func is not None:
-            #        self.failed_drop_func(*self.failed_drop_args)
-            #    anim = Animation(pos=self._old_drag_pos, duration=self.not_drop_ok_animation_time,
-            #                     t="in_quad")
-            #    if self.remove_on_drag:
-            #        anim.bind(on_complete = self.reborn)
-            #    else:
-            #        anim.bind(on_complete = self.un_root_me)
-            #    anim.start(self)
-            print ("on_drag_finish(): THE END. Drag finished, parent:", self.parent)
+            debug.print ("THE END. Drag finished, me:", self, "parent:", self.parent)
 
     def un_root_and_close(self, animation_object=None, same_as_self=None):
         self.un_root_me()
@@ -589,14 +571,15 @@ n                  (This means it left that widget without dispatching on_motion
         return widget_x <= x <= (widget.width + widget_x) and widget_y <= y <= (widget_y + widget.height)
 
     def un_root_me(self, widget="dumb", anim="dumb2"):
-        # print ("Unroot: ", self.parent)
+        debug.print ("Unroot start, parent: ", self.parent, "Me:", self)
         self.get_root_window().remove_widget(self)
-        # print ("unroot done, parent: ", self.parent)
+        debug.print ("unroot done, parent: ", self.parent, "Me:", self)
 
     def on_being_dragged(self):
         pass
 
     def reborn(self, widget=None, anim=None):
+        debug.print ("self.reborn(), old parent:", self._old_parent)
         self.un_root_me()
         # BUG: We don't just add the reborn child to the parent.
         # Adding child in the first position (the highest index) fails due
@@ -606,6 +589,7 @@ n                  (This means it left that widget without dispatching on_motion
         for childs in self._old_parent.children[:]:
             self._old_parent.remove_widget(childs)
         for childs in self._old_parent_children_reversed_list:
+            debug.print ("self.reborn(), add ", childs, "to", self._old_parent)
             self._old_parent.add_widget(childs)
         return
         #As of this moment, this code is unreachable- it's a placeholder.
@@ -633,11 +617,9 @@ n                  (This means it left that widget without dispatching on_motion
         """
         if self.failed_drop_func is not None:
             self.failed_drop_func(self, *self.failed_drop_args)
-        if self.remove_on_drag:
-            self.reborn()
-        else:
-            self.un_root_and_close()
-        self.post_unsuccessful_animation(False) # Simply resets some flags; opacity will be set after the animation
+        self.set_drag_finish_state(False)
+        # TODO: CHECK THIS MIKE
+        # self.post_unsuccessful_animation(False)
 
     def post_unsuccessful_animation(self, animation=None, widget=None):
         """
@@ -648,6 +630,10 @@ n                  (This means it left that widget without dispatching on_motion
         :param widget: the widget that this is run from, or nothing (not used)
         :return: nothing
         """
+        if self.remove_on_drag:
+            self.reborn()
+        else:
+            self.un_root_and_close()
         self.opacity = self._old_opacity
 
 
@@ -664,22 +650,22 @@ n                  (This means it left that widget without dispatching on_motion
         :param widget: the widget that this is run from, or nothing (not used)
         :return: nothing
         """
-        print ("on_successful_drop: ================================================================")
-        print ("on_successful_drop 1, Parent:", self.parent, "object: ", self, "copy?", self.copy)
-        print ("object:", self, "added args:", *self.drop_args)
-        print ("is_double_tap?", self.is_double_tap)
-        #traceback.print_stack()
+        debug.print ("on_successful_drop: ================================================================")
+        debug.print ("on_successful_drop 1, Parent:", self.parent, "object: ", self, "copy?", self.copy)
+        debug.print ("object:", self, "added args:", *self.drop_args)
+        debug.print ("is_double_tap?", self.is_double_tap)
+        #traceback.debug.print_stack()
         if self.drop_func is not None:
-            print (hex(id(self)), "Calling drop_func...")
-            print ("With args:", self, *self.drop_args)
+            debug.print (hex(id(self)), "Calling drop_func...")
+            debug.print ("With args:", self, *self.drop_args)
             self.drop_func(self, *self.drop_args)
         for found_drop_recipient, dropped_ok in self.found_drop_recipients_ok_dict.items():
             if dropped_ok:
                 if getattr(found_drop_recipient, "drop_func", None) is not None:
-                    print (hex(id(self)), "Calling recipient's drop_func")
+                    debug.print (hex(id(self)), "Calling recipient's drop_func")
                     found_drop_recipient.drop_func(self)
         self.set_drag_finish_state(False) # Opacity will be set after the animation.
-        print ("on_successful_drop: === end ========================================================")
+        debug.print ("on_successful_drop: === end ========================================================")
 
     def post_successful_animation(self, animation=None, widget=None):
         """
@@ -689,9 +675,9 @@ n                  (This means it left that widget without dispatching on_motion
         :param widget:
         :return:
         """
-        print ("post_successful_animation 1, Parent:", self.parent, "object: ", self, "copy?", self.copy)
+        debug.print ("post_successful_animation 1, Parent:", self.parent, "object: ", self, "copy?", self.copy)
         self.un_root_me()
-        print ("post_successful_animation 2, Parent:", self.parent, "object: ", self, "copy?", self.copy)
+        debug.print ("post_successful_animation 2, Parent:", self.parent, "object: ", self, "copy?", self.copy)
         self.opacity = self._old_opacity
         for found_drop_recipient, dropped_ok in self.found_drop_recipients_ok_dict.items():
             if dropped_ok:
@@ -756,13 +742,13 @@ class DropDestination(Widget):
         # TODO: close all children (they have bound properties, too!
 
     def bind_drop_group(self, arg1, arg2):
-        # print "BINDING DROP GROUP"
+        # debug.print "BINDING DROP GROUP"
         if self.drop_group not in drag_destinations_dict:
             drag_destinations_dict[self.drop_group]={}
         drag_destinations_dict[self.drop_group][self]=True
 
     def bind_mouse_motion(self, instance, value):
-        # print "DropDestination: BINDNG WIDGETS to Mouse Motion!", instance, value
+        # debug.print "DropDestination: BINDNG WIDGETS to Mouse Motion!", instance, value
         if self.motion_is_bound_to_window is False:
             Window.bind(mouse_pos=self.on_motion)
         self.motion_is_bound_to_window = True
@@ -789,14 +775,14 @@ class DropDestination(Widget):
         :param motion_xy_tuple: The coordinates of the mouse in the Window's coordinate system
         :return:
         """
-        # print "event x,y:", motionevent[0], motionevent[1], "self x,y,w,h:", self.x, self.y, self.width, self.height
-        # print "event x,y:", motionevent[0], motionevent[1], "self:", self
+        # debug.print "event x,y:", motionevent[0], motionevent[1], "self x,y,w,h:", self.x, self.y, self.width, self.height
+        # debug.print "event x,y:", motionevent[0], motionevent[1], "self:", self
         # motionevent is in the main Window's coordinate system.
-        # print "Self.to_window:", self.to_window(self.x, self.y)
+        # debug.print "Self.to_window:", self.to_window(self.x, self.y)
         # TODO: I believe I have compensated for any relative widget, here.
         # TODO: ...but be wary. I'm still not sure about how RelativeLayout will behave.
         if self.absolute_collide_point(motion_xy_tuple[0], motion_xy_tuple[1]):
-            # print motionevent[0], on_[1], "pointer collides DropDestination:", self
+            # debug.print motionevent[0], on_[1], "pointer collides DropDestination:", self
             if self.in_me:
                 self.dispatch("on_motion_inside", motion_xy_tuple)
             else:
@@ -813,7 +799,7 @@ class DropDestination(Widget):
     def absolute_collide_point(self, x, y):
         (my_x, my_y)=self.to_window(self.x, self.y)
         (event_x, event_y) = self.to_window(x, y)
-        # print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
+        # debug.print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
         return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
 
     def on_motion_flee(self, motion_xy_tuple):
@@ -821,14 +807,14 @@ class DropDestination(Widget):
         Called when your touch point leaves a draggable item.
         :return:
         """
-        # print "DropDestination: MOTION flee"
+        # debug.print "DropDestination: MOTION flee"
         if self.motion_flee_widget_func is not None:
             self.motion_flee_widget_func(self, self.motion_flee_widget_args)
             # TODO: WAS... adding these binds. Not sure why.
             # self.easy_access_dnd_function_binds)
         else:
             pass
-            # print "FUNCTION MOTION FLEE NONE"
+            # debug.print "FUNCTION MOTION FLEE NONE"
         DropDestination.widget_entered = None
 
     def on_motion_over(self, motion_xy_tuple):
@@ -836,31 +822,31 @@ class DropDestination(Widget):
         Called when your touch point crosses into a draggable item.
         :return:
         """
-        # print "DropDestination: MOTION over", motion_xy_tuple
+        # debug.print "DropDestination: MOTION over", motion_xy_tuple
         if self.motion_over_widget_func is not None:
             self.motion_over_widget_func(self, self.motion_over_widget_args)
             # self.easy_access_dnd_function_binds)
         # else:
-        #    print "FUNCTION MOTION OVER NONE"
+        #    debug.print "FUNCTION MOTION OVER NONE"
 
     def on_motion_outside(self, motion_xy_tuple):
-        # print "DropDestination: MOTION outside"
+        # debug.print "DropDestination: MOTION outside"
         try:
             if self.motion_outside_widget_func is not None:
                 self.motion_outside_widget_func(self, self.motion_outside_widget_args)
             else:
                 pass
-                # print "FUNCTION OUT NONE"
+                # debug.print "FUNCTION OUT NONE"
         except AttributeError:
             pass
 
     def on_motion_inside(self, motion_xy_tuple):
-        # print "on_motion_inside: DropDestination INSIDE"
+        # debug.print "on_motion_inside: DropDestination INSIDE"
         try:
             if self.motion_inside_widget_func is not None:
                 self.motion_inside_widget_func(self.motion_inside_widget_args)
             else:
                 pass
-                # print "FUNCTION OUT NONE"
+                # debug.print "FUNCTION OUT NONE"
         except AttributeError:
             pass
