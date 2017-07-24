@@ -62,7 +62,7 @@ FloatLayout:
             droppable_zone_objects: [left_label, relative_left_label, relative_right_label, from_box]
             drop_ok_animation_time: 1.5
             drop_func: app.greet
-            drop_args: [ root, self ]
+            drop_args: [ root ]
             failed_drop_func: self.oops
             failed_drop_args: [ root, app ]
             remove_on_drag: False
@@ -110,7 +110,7 @@ FloatLayout:
                 pos_hint: {'x': 0.55, 'y': 0.3}
 '''
 
-kv1 = '''
+kv_msgbox = '''
 DialogLabel:
     rgba_list: (0.5, 0.5, 0.5, 1.0)
     canvas.before:
@@ -131,27 +131,29 @@ class app_relative_layout(App):
     def build(self):
         return Builder.load_string(kv)
 
-    def greet(self, arg1=None, arg2=None):
+    def greet(self, calling_widget, kv_root=None):
         '''
-        
-        :param arg1: the root window
-        :param arg2: the widget that calls this method
-        :return: 
-        '''
-        print ("App.greet()...")
-        kv_root = arg1
-        messagebox = Builder.load_string(kv1)
-        messagebox.text = "Dragging done!!!"
 
+        :param calling_widget: the widget that calls this method. It was the one that was
+        dragged-and-dropped
+        :param kv_root: the root window from the Kivy language.
+        :return:
+        '''
+        print ("app.greet()... calling_widget:", calling_widget,
+               "======== SENDS THE MESSAGE ========== double tap:",
+               calling_widget.is_double_tap, "kv_root:", kv_root)
+        messagebox = Builder.load_string(kv_msgbox)
+        messagebox.text = "Dragging done!!!" # WHAT IF IT WAS DOUBLE_TAPPED? EXAMPLE!
+        if calling_widget.is_double_tap:
+            messagebox.text = "Make it a Double, barkeep!"
         kv_root.parent.add_widget(messagebox)
         messagebox.flash()
 
-    def oops(self, arg1=None, arg2=None):
-        # print "Self, arg1, arg2:", self, arg1, arg2
-        messagebox = Builder.load_string(kv1)
+    def oops(self, calling_widget, kv_root=None, app=None):
+        print ("app_relative_layout.oops(): Self, arg1, arg2:", self, kv_root, app)
+        messagebox = Builder.load_string(kv_msgbox)
         messagebox.text = "Ooops! Can't drop there!"
 
-        kv_root = arg1
         kv_root.parent.add_widget(messagebox)
         messagebox.flash()
 
