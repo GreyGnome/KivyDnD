@@ -29,6 +29,8 @@ from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.factory import Factory
 from kivy.properties import NumericProperty, ListProperty
+from debug_print import Debug
+debug=Debug(True)
 
 
 # Classes in the FloatLayout are defined in DraggableButton.py, included above.
@@ -139,7 +141,7 @@ class app_relative_layout(App):
         :param kv_root: the root window from the Kivy language.
         :return:
         '''
-        print ("app.greet()... calling_widget:", calling_widget,
+        debug.print ("calling_widget:", calling_widget,
                "======== SENDS THE MESSAGE ========== double tap:",
                calling_widget.is_double_tap, "kv_root:", kv_root)
         messagebox = Builder.load_string(kv_msgbox)
@@ -150,7 +152,7 @@ class app_relative_layout(App):
         messagebox.flash()
 
     def oops(self, calling_widget, kv_root=None, app=None):
-        print ("app_relative_layout.oops(): Self, arg1, arg2:", self, kv_root, app)
+        debug.print ("Self, arg1, arg2:", self, kv_root, app)
         messagebox = Builder.load_string(kv_msgbox)
         messagebox.text = "Ooops! Can't drop there!"
 
