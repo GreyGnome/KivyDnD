@@ -23,7 +23,7 @@ in its same drop group. You can have multiple drop groups. Another feature
 is that a DropDestination can fire an event when the pointer enters its
 boundaries, and when it leaves. See the code for more information. 
 
-# Simple Usage:
+# Usage:
 Create a subdirectory somewhere alongside your executable. Put all the files in this repo
 into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
 `DragNDropWidget`. Example: assume
@@ -61,13 +61,42 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
         size_hint: None, None
         size: 100, 100 
 ```
-## Member Summary
-
-
-Header Row | Column 2 | Column 3
+|Member Summary |   |   |
 --- | --- |---
-first row  | number 2 | number 3
-hello | wow | hi
+| Member Name | Type(default value) | Description |
+| **DragNDropWidget**  |   |   |
+| **Properties** |  |  |
+| droppable_zone_objects | ListProperty([]) | List of widgets that this widget can will accept a drop from this widget. |
+| bound_zone_objects | ListProperty([]) | List of widgets; this widget cannot be dragged outside of the limits given by the outside boundaries of all the widgets in this list. See "dndapp2.py" for an example. |
+| drag_opacity | NumericProperty(1.0) | Opacity of this widget during a drag. |
+| drop_args  | ListProperty([]) | List of additional arguments given to drop_func. Note that this widget is always given as the first argument to drop_func (after `self`). |
+| failed_drop_args | ListProperty([]) | List of additional arguments given to drop_func. Note that this widget is always given as the first argument to failed_drop_func (after `self`). |
+| remove_on_drag | BooleanProperty(True) | Whether this widget should be removed upon a drag. Else a copy will be made. |
+| drop_ok_do_animation | BooleanProperty(True) | Whether a fade animation should be performed at the end of a successful drag-n-drop. |
+| drop_ok_animation_time | NumericProperty(0.5) | How long the fade should take place. |
+| not_drop_ok_do_animation | BooleanProperty(True) | Whether a fade animation should take place after an unsuccessful drag. Note that by default no animation will take place if the widget is dropped back onto parent. |
+| not_drop_ok_animation_time | NumericProperty(0.2) | How long the fade should take place. |
+| motion_over_widget_args | ListProperty([]) | List of arguments given to motion_over_widget_func (after `self`). |
+| motion_flee_widget_args | ListProperty([]) | List of arguments given to motion_over_widget_func (after `self`). |
+| motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). |
+| drag_start_args | ListProperty([]) | List of arguments given to drag_start_func (after `self`). |
+| can_drop_into_parent | BooleanProperty(False) | Whether a drag-n-drop of the widget back onto its parent counts as a successful drop or not. If a widget's parent is a drop destination for this widget, a drag-n-drop will not be successful there unless this is set. |
+| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. |
+| **Methods** |  |  |
+| drop_func |  |  |
+| while_dragging_func |  |  |
+| failed_drop_func |  |  |
+| motion_over_widget_func |  |  |
+| motion_flee_widget_func |  |  |
+| motion_outside_widget_func |  |  |
+| drag_start_func |  |  |
+| **DropDestination**  |   |   |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
 
 # Example
 Here's a complete, working example. For more examples check the distribution.
