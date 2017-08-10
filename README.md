@@ -66,7 +66,7 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | Member Name | Type(default value) | Description |
 | **DragNDropWidget**  |   |   |
 | **Properties** |  |  |
-| droppable_zone_objects | ListProperty([]) | List of widgets that this widget can will accept a drop from this widget. |
+| droppable_zone_objects | ListProperty([]) | List of widgets that accept a drop of this widget. |
 | bound_zone_objects | ListProperty([]) | List of widgets; this widget cannot be dragged outside of the limits given by the outside boundaries of all the widgets in this list. See "dndapp2.py" for an example. |
 | drag_opacity | NumericProperty(1.0) | Opacity of this widget during a drag. |
 | drop_args  | ListProperty([]) | List of additional arguments given to drop_func. Note that this widget is always given as the first argument to drop_func (after `self`). |
@@ -81,15 +81,15 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). |
 | drag_start_args | ListProperty([]) | List of arguments given to drag_start_func (after `self`). |
 | can_drop_into_parent | BooleanProperty(False) | Whether a drag-n-drop of the widget back onto its parent counts as a successful drop or not. If a widget's parent is a drop destination for this widget, a drag-n-drop will not be successful there unless this is set. |
-| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. |
-| **Methods** |  |  |
-| drop_func |  |  |
-| while_dragging_func |  |  |
-| failed_drop_func |  |  |
-| motion_over_widget_func |  |  |
-| motion_flee_widget_func |  |  |
-| motion_outside_widget_func |  |  |
-| drag_start_func |  |  |
+| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object. |
+| **Methods** | default arguments |  |
+| drop_func | self, drop_args | The user-defined method or function that will be run at the end of a successful drop. |
+| while_dragging_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
+| failed_drop_func | self, failed_drop_args | The user-defined method or function that will be run at the end of a failed drop. |
+| motion_over_widget_func | self, motion_over_widget_args | The user-defined method or function that will be run when the pointer enters the boundaries of this widget. |
+| motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
+| motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
+| drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
 | **DropDestination**  |   |   |
 |  |  |  |
 |  |  |  |
