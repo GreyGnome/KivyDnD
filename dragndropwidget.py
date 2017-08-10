@@ -38,7 +38,7 @@ draggables_dict={}
 class DragNDropWidget(Widget):
     # let kivy take care of kwargs and get signals for free by using
     # properties
-    droppable_zone_objects = ListProperty()
+    droppable_zone_objects = ListProperty([])
     bound_zone_objects = ListProperty([])
     drag_opacity = NumericProperty(1.0)
     drop_func = ObjectProperty(None)
@@ -51,7 +51,6 @@ class DragNDropWidget(Widget):
     drop_ok_animation_time = NumericProperty(0.5)
     not_drop_ok_do_animation = BooleanProperty(True)
     not_drop_ok_animation_time = NumericProperty(0.2)
-    widget_entered = None
     motion_over_widget_func = ObjectProperty(None)
     motion_over_widget_args = ListProperty([])
     motion_flee_widget_func = ObjectProperty(None)
@@ -62,6 +61,8 @@ class DragNDropWidget(Widget):
     drag_start_args = ListProperty([])
     can_drop_into_parent = BooleanProperty(False)
     drop_group = StringProperty(None)
+    # This is not a Property
+    widget_entered = None
 
     def __init__(self, **kw):
         super(DragNDropWidget, self).__init__(**kw)
