@@ -18,7 +18,7 @@
 
 from kivy.app import App
 from kivy.lang import Builder
-import DraggableButton  # import to get auto register
+import draggablestuff  # import to get auto register
 from kivy.clock import Clock
 
 kv = '''
@@ -35,7 +35,7 @@ FloatLayout:
         pos_hint: {'x': 0.1, 'y': 0.4}
 
         DraggableButton:
-            text: '1. Defaults'
+            text: '1. Bound zone'
             bound_zone_objects: [from_box, lower_to_box, upper_to_box ]
             droppable_zone_objects: [lower_to_box, upper_to_box ]
             drop_ok_animation_time: 1.5
@@ -153,7 +153,7 @@ class dndapp2(App):
 
         #print arg1, arg2
 
-    def oops(self):
+    def oops(self, arg1):
         print "Ooops!"
 
 if __name__ == '__main__':

@@ -21,13 +21,15 @@ Created on Oct 24, 2012
 @author: Pavel Kostelnik
 '''
 
+from __future__ import print_function
 
-from DragNDropWidget import DragNDropWidget
+from dragndropwidget import DragNDropWidget
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
-
+from debug_print import Debug
+debug=Debug(False)
 
 class DraggableButton(Button, DragNDropWidget):
     '''
@@ -40,17 +42,35 @@ class DraggableButton(Button, DragNDropWidget):
         #Button.__init__(self, **kw)
         super(DraggableButton, self).__init__(**kw)
         self.size_hint = (None, None)
+        Clock.schedule_interval(self.show_parent, 2)
 
     def __deepcopy__(self, dumb):
         return DraggableButton(text=self.text)
 
-    def greet(self, object):
-        print "greetings from DROPBUTTON"
+    def greet(self, arg1, arg2):
+        print ("greetings from DraggableButton")
 
-    def oops(self):
-        print "OOOPS!!!"
+    def oops(self, arg1):
+        print ("OOOPS!!! from DraggableButton")
+
+    def on_successful_drop(self):
+        super(DraggableButton, self).on_successful_drop()
+        debug.print ("DraggableButton: on_successful_drop")
+
+#    def on_unsuccessful_drop(self, arg1):
+#        super(DraggableButton, self).on_unsuccessful_drop()
+#        print ("DraggableButton: on_unsuccessful_drop")
+
+    def show_parent(self, delta_time):
+        if self.parent == None:
+            debug.print ("DraggableButton", self, "not visible but certainly not gone!")
+
 
 class DragDestinationLabel(Label):
+    def __init__(self, *args, **kwargs):
+        super(DragDestinationLabel, self).__init__(**kwargs)
+        self.i = 0
+
     def on_touch_down(self, touch):
         pass
 
@@ -67,16 +87,21 @@ class DragDestinationLabel(Label):
             Clock.unschedule(self.cycle_message)
             self.i = 0
             self.toggle_text = True
+            self.text = "Drag and Drop done!"
 
     def greeter(self, *args):
-        self.i = 0
+        self.i += 1
         self.toggle_text = True
         self.initial_text = self.text
-        self.dropped_text = "YAY! " + args[0].text + " dropped here!"
-        Clock.schedule_interval(self.cycle_message, 0.3)
+        self.text = args[0].text + " dropped here! " + str(self.i) + " times"
 
 
 class DragSourceBoxLayout(BoxLayout):
     def on_touch_down(self, touch):
-        print "BOXLAYOUT GOT TOUCHED!", str(self)
         super (DragSourceBoxLayout, self).on_touch_down(touch)
+
+    def drop_func(self, arg1):
+        debug.print ("drop_func: Dropped here", arg1)
+        arg1.parent.remove_widget(arg1)
+        self.add_widget(arg1)
+        arg1.opacity = 1.0
