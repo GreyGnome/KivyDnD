@@ -23,7 +23,7 @@ in its same drop group. You can have multiple drop groups. Another feature
 is that a DropDestination can fire an event when the pointer enters its
 boundaries, and when it leaves. See the code for more information. 
 
-# Usage:
+# Usage
 Create a subdirectory somewhere alongside your executable. Put all the files in this repo
 into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
 `DragNDropWidget`. Example: assume
@@ -61,9 +61,9 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
         size_hint: None, None
         size: 100, 100 
 ```
-|Member Summary |   |   |
+## Member Summary
+|Member Name |  Type(default value) | Description |
 --- | --- |---
-| Member Name | Type(default value) | Description |
 | **DragNDropWidget**  |   |   |
 | **Properties** |  |  |
 | droppable_zone_objects | ListProperty([]) | List of widgets that accept a drop of this widget. |
@@ -82,21 +82,26 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | drag_start_args | ListProperty([]) | List of arguments given to drag_start_func (after `self`). |
 | can_drop_into_parent | BooleanProperty(False) | Whether a drag-n-drop of the widget back onto its parent counts as a successful drop or not. If a widget's parent is a drop destination for this widget, a drag-n-drop will not be successful there unless this is set. |
 | drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object. |
-| **Methods** | default arguments |  |
+| **Methods** | arguments |  |
 | drop_func | self, drop_args | The user-defined method or function that will be run at the end of a successful drop. |
-| while_dragging_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
+| while_draggingn_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
 | failed_drop_func | self, failed_drop_args | The user-defined method or function that will be run at the end of a failed drop. |
 | motion_over_widget_func | self, motion_over_widget_args | The user-defined method or function that will be run when the pointer enters the boundaries of this widget. |
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
 | drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
-| **DropDestination**  |   |   |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
+| **DropDestination**  |  |  |
+| **Properties** | Type(default value) | Description |
+| motion_over_widget_args | ListProperty([]) | List of arguments given to motion_over_widget_func (after `self`). |
+| motion_flee_widget_args | ListProperty([]) | List of arguments given to motion_flee_widget_func (after `self`). |
+| motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). | |
+| motion_inside_widget_args | ListProperty([]) | List of arguments given to motion_inside_widget_func (after `self`). | |
+| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from DragNDropWidget's in the same drop_group. Can be used instead of, or in addition to, `droppable_zone_objects`, which would be defined in a DragNDropWidget object. |
+| **Methods** | arguments |  |
+| motion_over_widget_func | self, self.motion_over_widget_args | The user-defined method or function that will be called when your touch point crosses into this DropDestination object.
+| motion_flee_widget_func | self, self.motion_flee_widget_args | The user-defined method or function that will be called when your touch point leaves the boundaries of this DropDestination object. |
+| motion_outside_widget_func | self, self.motion_outside_widget_args | The user-defined method or function that will be called when your touch point moves outside the boundaries of this DropDestination object. Can be quite chatty; be careful about adding this to too many widgets. |
+| motion_inside_widget_func | self, motion_inside_widget_args | The user-defined method or function that will be called when your touch point moves inside the boundaries of this DropDestination object. |
 
 # Example
 Here's a complete, working example. For more examples check the distribution.
