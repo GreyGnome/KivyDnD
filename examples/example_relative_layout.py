@@ -19,7 +19,7 @@
 # The destination widgets' text changes upon successful drop. That text is maintained
 # in the destination widgets.
 
-# File: app_relative_layout.py
+# File: example_relative_layout.py
 from __future__ import print_function
 
 from kivy.app import App

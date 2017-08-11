@@ -13,9 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# File: app_copy_draggable.py
+# File: example_copy_draggable.py
 #       Simple example of the DragNDropWidget Kivy library.
-#       Expands on dndapp0.py. Additional features of the library:
+#       Expands on dndexample2.py. Additional features of the library:
 #       * Copy the draggable widget, instead of removing it from the parent.
 #       * Can drop onto the original's parent
 #       * The parent has a drop_func defined
@@ -48,9 +48,9 @@ FloatLayout:
             droppable_zone_objects: [upper_to_box, from_box]
             drop_ok_animation_time: 1.5
             drop_func: app.greet
-            drop_args: [ root, self ]
+            #drop_args: [ root, self ]
             failed_drop_func: app.oops
-            failed_drop_args: [ root, self ]
+            #failed_drop_args: [ root, self ]
             remove_on_drag: False
             can_drop_into_parent: True
 
@@ -81,8 +81,8 @@ DialogLabel:
     pos_hint: {'x': 0.3, 'y': 0.65}
 '''
 
-class DialogLabel(Label):
 
+class DialogLabel(Label):
     def __init__(self, *args, **kwargs):
         self.toggle_color = True
         self.i = 0
@@ -93,7 +93,6 @@ class DialogLabel(Label):
         Clock.schedule_interval(self.cycle_color, 0.3)
 
     def cycle_color(self, dt):
-        print (self.rgba_list)
         if self.i < 6:
             if self.toggle_color:
                 # toggled color
@@ -109,6 +108,7 @@ class DialogLabel(Label):
             self.i = 0
             self.toggle_color = True
             self.parent.remove_widget(self)
+
 
 class dndapp0(App):
     def __init__(self, **kw):
@@ -132,13 +132,14 @@ class dndapp0(App):
         messagebox.flash()
 
     def oops(self, arg1=None, arg2=None):
-        print ("Self, arg1, arg2:", self, arg1, arg2)
+        print("Self, arg1, arg2:", self, arg1, arg2)
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Ooops! Can't drop there!"
 
         kv_root = arg1
         kv_root.parent.add_widget(messagebox)
         messagebox.flash()
+
 
 if __name__ == '__main__':
     dndapp0().run()
