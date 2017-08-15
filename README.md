@@ -14,14 +14,16 @@ A widget subclassed from this class will be able to be picked up and moved
 around in the main window, then dropped onto other chosen widgets. Then,
 defined functions can be run in response.
 ## DropDestination
-Using DropDestination is optional. Though the DragNDropWidget can define who
+Using DropDestination is optional. It adds two features to the library: drop groups, and 
+the ability to fire events when the pointer enters and leaves the boundaries of these
+Widgets. Drop groups allow control over which widget(s) can receive a drop from particular
+DragNDropWdidget(s). Though the DragNDropWidget can define who
 its recipients will be (see `droppable_zone_objects` in the example below),
-a DropDestination allows for the creation of "drop groups". These are
-widgets that can receive a drop from defined DragNDropWidget's. In other
-words, a draggable widget in a drop group can only be dropped into widgets
-in its same drop group. You can have multiple drop groups. Another feature
-is that a DropDestination can fire an event when the pointer enters its
-boundaries, and when it leaves. See the code for more information. 
+a draggable widget in a drop group can only be dropped into widgets
+in its same drop group. You can have multiple drop groups, any DragNDropWidget can be a
+member of multiple drop groups, and any DropDestination can be a member of multiple drop
+groups. Another feature is that a DropDestination can fire an event when the pointer enters
+its boundaries, and when it leaves. See the code for more information. 
 
 # Usage
 Create a subdirectory somewhere alongside your executable. Put all the files in this repo
