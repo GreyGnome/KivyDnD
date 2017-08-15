@@ -695,8 +695,8 @@ class DropDestination(Widget):
     motion_outside_widget_args = ListProperty([])
     motion_inside_widget_func = ObjectProperty(None)
     motion_inside_widget_args = ListProperty([])
-    widget_entered = None
     drop_group = StringProperty(None)
+    widget_entered = None
 
     def __init__(self, **kw):
         super(DropDestination, self).__init__(**kw)
@@ -820,7 +820,7 @@ class DropDestination(Widget):
 
     def on_motion_over(self, motion_xy_tuple):
         """
-        Called when your touch point crosses into a draggable item.
+        Called when your touch point crosses into a DropDestination object.
         :return:
         """
         # debug.print "DropDestination: MOTION over", motion_xy_tuple
@@ -845,7 +845,7 @@ class DropDestination(Widget):
         # debug.print "on_motion_inside: DropDestination INSIDE"
         try:
             if self.motion_inside_widget_func is not None:
-                self.motion_inside_widget_func(self.motion_inside_widget_args)
+                self.motion_inside_widget_func(self, self.motion_inside_widget_args)
             else:
                 pass
                 # debug.print "FUNCTION OUT NONE"
