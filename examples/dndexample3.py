@@ -13,13 +13,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# File: dndapp2.py
+# File: dndexample3.py
 #       Example of the DragNDropWidget Kivy library.
 
+from __future__ import print_function
 from kivy.app import App
 from kivy.lang import Builder
 import draggablestuff  # import to get auto register
 from kivy.clock import Clock
+
+from debug_print import debug_print
 
 kv = '''
 FloatLayout:
@@ -116,9 +119,9 @@ FloatLayout:
 '''
 
 
-class dndapp2(App):
+class DnDExample3(App):
     def __init__(self, **kw):
-        super(dndapp2, self).__init__(**kw)
+        super(DnDExample3, self).__init__(**kw)
         self.i = 0
         self.toggle_text = True
 
@@ -126,17 +129,19 @@ class dndapp2(App):
         return Builder.load_string(kv)
 
     def greet(self, arg1=None, arg2=None):
-        print "GREETINGS FROM APP!!!"
-        print "Dragging done!!!",
-        print str(arg1), str(arg2)
-        #for destination in arg1.drop_recipients:
-        #    print "TEXT:",destination.text
-        #    self.initial_text = destination.text
-        #    self.flash_widget = destination
-        #    Clock.schedule_interval(self.cycle_message, 0.5)
+        print("GREETINGS FROM APP!!!")
+        print("Dragging done!!!", end=' ')
+        print(str(arg1), str(arg2))
+
+        # Debug
+        for destination in arg1.drop_recipients:
+            debug_print("TEXT:", destination.text)
+            self.initial_text = destination.text
+            self.flash_widget = destination
+            Clock.schedule_interval(self.cycle_message, 0.5)
 
     def cycle_message(self, dt):
-        print "CYCLE!!!!"
+        debug_print("CYCLE!!!!")
         if self.i < 6:
             if self.toggle_text:
                 self.flash_widget.text = "from app.greet: YAY! DROPPED HERE!"
@@ -154,7 +159,7 @@ class dndapp2(App):
         #print arg1, arg2
 
     def oops(self, arg1):
-        print "Ooops!"
+        print("Ooops!")
 
 if __name__ == '__main__':
-    dndapp2().run()
+    DnDExample3().run()
