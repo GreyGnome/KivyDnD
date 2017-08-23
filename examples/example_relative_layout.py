@@ -22,14 +22,10 @@
 # File: example_relative_layout.py
 from __future__ import print_function
 
+from debug_print import Debug
 from kivy.app import App
 from kivy.lang import Builder
-import relative_stuff
-from kivy.clock import Clock
-from kivy.uix.label import Label
-from kivy.factory import Factory
-from kivy.properties import NumericProperty, ListProperty
-from debug_print import Debug
+
 debug=Debug(True)
 
 

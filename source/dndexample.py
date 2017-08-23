@@ -21,8 +21,8 @@ from __future__ import print_function
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.button import Button
-from kivy.uix.label import Label
-from dragndropwidget import DragNDropWidget
+
+from source.dragndropwidget import DragNDropWidget
 
 kv = '''
 FloatLayout:

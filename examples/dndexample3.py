@@ -17,12 +17,11 @@
 #       Example of the DragNDropWidget Kivy library.
 
 from __future__ import print_function
-from kivy.app import App
-from kivy.lang import Builder
-import draggablestuff  # import to get auto register
-from kivy.clock import Clock
 
 from debug_print import debug_print
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.lang import Builder
 
 kv = '''
 FloatLayout:

@@ -20,12 +20,11 @@
 
 from __future__ import print_function
 
-from kivy.app import App
-from kivy.lang import Builder
-import draggablestuff
-from kivy.clock import Clock
-from kivy.uix.label import Label
 from debug_print import debug_print, set_debug_flag
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.lang import Builder
+from kivy.uix.label import Label
 
 set_debug_flag(False)
 

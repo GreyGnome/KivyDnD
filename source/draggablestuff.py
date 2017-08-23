@@ -23,12 +23,14 @@ Created on Oct 24, 2012
 
 from __future__ import print_function
 
-from dragndropwidget import DragNDropWidget
+from debug_print import Debug
+from kivy.clock import Clock
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.clock import Clock
-from debug_print import Debug
+
+from source.dragndropwidget import DragNDropWidget
+
 debug=Debug(False)
 
 class DraggableButton(Button, DragNDropWidget):

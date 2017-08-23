@@ -17,10 +17,12 @@
 #       Simplest example of the DragNDropWidget Kivy library.
 
 from __future__ import print_function
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.button import Button
-from dragndropwidget import DragNDropWidget
+
+from source.dragndropwidget import DragNDropWidget
 
 kv = '''
 FloatLayout:
