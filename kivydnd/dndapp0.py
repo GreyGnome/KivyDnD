@@ -13,14 +13,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# File: dndexample2.py
+# File: dndapp0.py
 #       Simple example of the DragNDropWidget Kivy library.
 #       Exercises some basic features of the library: setting droppable_zone_objects,
 #       drop_ok_animation_time, drop_func and failed_drop_func.
 
 from __future__ import print_function
 
-from kivydnd.debug_print import debug_print, set_debug_flag
+from debug_print import debug_print, set_debug_flag
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -30,8 +30,6 @@ set_debug_flag(False)
 
 # Classes in the FloatLayout are defined in DraggableButton.py, included above.
 kv = '''
-#:import DragSourceBoxLayout kivydnd.dndwidgets.DragSourceBoxLayout
-
 FloatLayout:
     DragSourceBoxLayout:
         id: from_box
@@ -93,6 +91,7 @@ DialogLabel:
 
 
 class DialogLabel(Label):
+
     def __init__(self, *args, **kwargs):
         self.toggle_color = True
         self.i = 0
@@ -103,7 +102,7 @@ class DialogLabel(Label):
         Clock.schedule_interval(self.cycle_color, 0.3)
 
     def cycle_color(self, delta_time):
-        debug_print("DialogLabel:cycle_color, parent:", self.parent)
+        debug_print ("DialogLabel:cycle_color, parent:", self.parent)
         if self.i < 6:
             if self.toggle_color:
                 # toggled color
@@ -115,32 +114,33 @@ class DialogLabel(Label):
                 self.toggle_color = True
             self.i += 1
         else:
-            debug_print("Me: ", self, "end of cycle_color")
+            debug_print ("Me: ", self, "end of cycle_color")
             Clock.unschedule(self.cycle_color)
             self.i = 0
             self.toggle_color = True
-            debug_print("Me: ", self, " My Parent:", self.get_parent_window())
+            debug_print ("Me: ", self, " My Parent:", self.get_parent_window())
             self.parent.remove_widget(self)
 
-
-class DnDExample2(App):
+class dndapp0(App):
     def __init__(self, **kw):
-        super(DnDExample2, self).__init__(**kw)
+        super(dndapp0, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
 
     def greet(self, calling_widget, root_widget):
-        """
+        '''
+        
         :param calling_widget: This is the first parameter given to drop_func() from
         on_successful_drop(). It is the widget that's being dropped.
         :param root_widget: the root widget found from the Kivy language, above
-        :return:
-        """
+        :return: 
+        '''
+        kv_root = root_widget
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Dragging done!!!"
 
-        print("App Greet: add messagebox")
+        debug_print ("App Greet: add messagebox")
         root_widget.add_widget(messagebox)
         messagebox.flash()
 
@@ -156,10 +156,9 @@ class DnDExample2(App):
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Ooops! Can't drop there!"
 
-        debug_print("App Oops: add messagebox", self)
-        kv_root.parent.add_widget(messagebox)  # Add it to the Top-level Window
+        debug_print ("App Oops: add messagebox", self)
+        kv_root.parent.add_widget(messagebox) # Add it to the Top-level Window
         messagebox.flash()
 
-
 if __name__ == '__main__':
-    DnDExample2().run()
+    dndapp0().run()

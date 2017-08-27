@@ -18,7 +18,7 @@
 
 from __future__ import print_function
 
-from debug_print import debug_print
+from kivydnd.debug_print import debug_print
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
