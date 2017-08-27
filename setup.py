@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(name='kivydnd',
       version='0.2',
@@ -6,4 +6,4 @@ setup(name='kivydnd',
       url='https://github.com/GreyGnome/KivyDnD',
       author='GreyGnome',
       license='Apache License 2.0',
-      packages=find_packages(exclude=['examples'],))
+      packages=['kivydnd'])
