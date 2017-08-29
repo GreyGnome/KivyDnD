@@ -22,7 +22,7 @@
 # File: example_relative_layout.py
 from __future__ import print_function
 
-from debug_print import Debug
+from kivydnd.debug_print import Debug
 from kivy.app import App
 from kivy.lang import Builder
 
@@ -31,6 +31,10 @@ debug=Debug(True)
 
 # Classes in the FloatLayout are defined in DraggableButton.py, included above.
 kv = '''
+#:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
+#:import DragDestinationBoxLayout example_base_classes.DragDestinationBoxLayout
+#:import DraggableButton example_base_classes.DraggableButton
+
 <DragDestinationLabel>:
     id: drag_destination_label
     canvas.before:

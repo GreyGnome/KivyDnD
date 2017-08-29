@@ -30,7 +30,7 @@ set_debug_flag(False)
 
 # Classes in the FloatLayout are defined in DraggableButton.py, included above.
 kv = '''
-#:import DragSourceBoxLayout kivydnd.dndwidgets.DragSourceBoxLayout
+#:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
 
 FloatLayout:
     DragSourceBoxLayout:

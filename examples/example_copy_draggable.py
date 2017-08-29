@@ -27,8 +27,10 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.uix.label import Label
 
-# Classes in the FloatLayout are defined in draggablestuff.py, included above.
+# Classes in the FloatLayout are defined in example_base_classes.py, included above.
 kv = '''
+#:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
+
 FloatLayout:
     DragSourceBoxLayout:
         id: from_box

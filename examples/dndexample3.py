@@ -24,6 +24,8 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 
 kv = '''
+#:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
+
 FloatLayout:
     DragSourceBoxLayout:
         id: from_box
