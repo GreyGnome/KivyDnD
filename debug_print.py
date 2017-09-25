@@ -50,8 +50,10 @@ class Debug():
         self.debug_flag = debug_flag
 
     def print(self, *args, **kwargs):
-        if not self.debug_flag:
-            return
+        definitely = kwargs.get('definitely',False)
+        if not definitely:
+            if not self.debug_flag:
+                return
         trace = traceback.extract_stack()
         # print (len(trace))
         this_entry = trace[len(trace) - 2]
@@ -59,4 +61,4 @@ class Debug():
         basename = "%-10s" % basename[len(basename) - 1]
         method = this_entry[2] + "()"
         method = "%-15s" % method
-        print(basename + ":" + str(this_entry[1]), method, *args, **kwargs)
+        print(basename + ":" + str(this_entry[1]), method, *args)
