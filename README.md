@@ -63,10 +63,31 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
         size_hint: None, None
         size: 100, 100 
 ```
+
+You can define a directory in your `sys.path` and put the library file there:
+
+```PythonStub
+sys.path.append("/path/to/directory/containing/dragndropwidget.py")
+
+from dragndropwidget import DragNDropWidget
+```
+
+You can find the already-defined directories in your `sys.path` and put the library file there:
+
+*(run python on your command line, then...)*
+```PythonStub
+from __future__ import print_function
+import sys
+print ('\n'.join(sys.path))
+```
+...choose one of the directories that are printed, probably something like
+`/usr/lib/python3.5/site-packages` or `/usr/lib/python2.7/site-packages` or the like.
+Copy the `dragndropwidget.py` file there.
+
 ## Member Summary
+### DragNDropWidget
 |Member Name |  Type(default value) | Description |
 --- | --- |---
-| **DragNDropWidget**  |   |   |
 | **Properties** |  |  |
 | droppable_zone_objects | ListProperty([]) | List of widgets that accept a drop of this widget. |
 | bound_zone_objects | ListProperty([]) | List of widgets; this widget cannot be dragged outside of the limits given by the outside boundaries of all the widgets in this list. See "dndapp2.py" for an example. |
@@ -92,8 +113,9 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
 | drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
-| **DropDestination**  |  |  |
+### DropDestination
 | **Properties** | Type(default value) | Description |
+--- | --- | ---
 | motion_over_widget_args | ListProperty([]) | List of arguments given to motion_over_widget_func (after `self`). |
 | motion_flee_widget_args | ListProperty([]) | List of arguments given to motion_flee_widget_func (after `self`). |
 | motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). | |
@@ -109,7 +131,7 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 Here's a complete, working example. For more examples check the distribution.
 For more information, see **API** below.
 ```Python
-# File: dndexample.py
+# File: DnDExample1.py
 #       Simplest example of the DragNDropWidget Kivy library.
 #
 from __future__ import print_function
@@ -160,9 +182,9 @@ class  DraggableButton(Button, DragNDropWidget):
         super(DraggableButton, self).__init__(**kw)
 #
 #
-class dndexample(App):
+class DnDExample1(App):
     def __init__(self, **kw):
-        super(dndexample, self).__init__(**kw)
+        super(DnDExample1, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
@@ -175,7 +197,7 @@ class dndexample(App):
 
 
 if __name__ == '__main__':
-    dndexample().run()
+    DnDExample1().run()
 ```
 # API
 ## Classes:
