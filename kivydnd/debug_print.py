@@ -39,8 +39,8 @@ class Debug():
 
     Output looks like this:
 
-    dragndropwidget.py:453 on_drag_finish() beginning, parent: <kivy.core.window.window_sdl2.WindowSDL object at 0x7f707ef0a2f0> copy? False
-    dragndropwidget.py:454 on_drag_finish() self: <draggablestuff.DraggableButton object at 0x7f707eec0d70> is_double_tap? False
+    dndwidgets.py:453 on_drag_finish() beginning, parent: <kivy.core.window.window_sdl2.WindowSDL object at 0x7f707ef0a2f0> copy? False
+    dndwidgets.py:454 on_drag_finish() self: <draggablestuff.DraggableButton object at 0x7f707eec0d70> is_double_tap? False
 
     That is, it prints:
 

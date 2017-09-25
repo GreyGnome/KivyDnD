@@ -21,16 +21,16 @@
 #       * The parent has a drop_func defined
 
 from __future__ import print_function
-from kivy.app import App
-from kivy.lang import Builder
-import draggablestuff
-from kivy.clock import Clock
-from kivy.uix.label import Label
-from kivy.factory import Factory
-from kivy.properties import NumericProperty, ListProperty
 
-# Classes in the FloatLayout are defined in draggablestuff.py, included above.
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.lang import Builder
+from kivy.uix.label import Label
+
+# Classes in the FloatLayout are defined in example_base_classes.py, included above.
 kv = '''
+#:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
+
 FloatLayout:
     DragSourceBoxLayout:
         id: from_box
