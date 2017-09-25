@@ -19,15 +19,17 @@
 #       the drag and drop widget library for Kivy.
 from __future__ import print_function
 
-from kivy.core.window import Window
-from kivy.animation import Animation
 import copy
-from kivy.uix.widget import Widget
+
+from kivy.animation import Animation
+from kivy.core.window import Window
 from kivy.properties import (
-    ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
-# import traceback
-from debug_print import Debug
-debug = Debug()  # Is False by default.
+	ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
+from kivy.uix.widget import Widget
+
+from .debug_print import Debug
+
+debug = Debug() # Is False by default.
 
 # This looks like:
 # dictionary[drag_group][widget] = true

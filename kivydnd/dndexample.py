@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# File: dndexample1.py
+# File: dndexample.py
 #       Simplest example of the DragNDropWidget Kivy library.
 
 from __future__ import print_function
@@ -22,7 +22,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.button import Button
 
-from kivydnd.dndwidgets import DragNDropWidget
+from .dndwidgets import DragNDropWidget
 
 kv = '''
 FloatLayout:
@@ -58,25 +58,28 @@ FloatLayout:
 '''
 
 
-class DraggableButton(Button, DragNDropWidget):
+class  DraggableButton(Button, DragNDropWidget):
     def __init__(self, **kw):
-        # Button.__init__(self, **kw)
+        '''
+        Constructor
+        '''
+        #Button.__init__(self, **kw)
         super(DraggableButton, self).__init__(**kw)
 
 
-class DnDExample1(App):
+class dndexample(App):
     def __init__(self, **kw):
-        super(DnDExample1, self).__init__(**kw)
+        super(dndexample, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
 
     def greet(self, calling_widget):
-        print("App says: Nicely Dropped!!")
+        print ("App says: Nicely Dropped!!")
 
     def oops(self, the_widget=None, parent=None, kv_root=None):
         print("App says: Ooops! Can't drop there!")
 
 
 if __name__ == '__main__':
-    DnDExample1().run()
+    dndexample().run()
