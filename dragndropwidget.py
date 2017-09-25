@@ -25,14 +25,14 @@ import copy
 from kivy.uix.widget import Widget
 from kivy.properties import (
     ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
-import traceback
+# import traceback
 from debug_print import Debug
-debug = Debug() # Is False by default.
+debug = Debug()  # Is False by default.
 
 # This looks like:
 # dictionary[drag_group][widget] = true
-drag_destinations_dict={}
-draggables_dict={}
+drag_destinations_dict = {}
+draggables_dict = {}
 
 
 class DragNDropWidget(Widget):
@@ -266,7 +266,8 @@ class DragNDropWidget(Widget):
             the_widget._dragged = True
             x = mouse_motion_event.x - the_widget.touch_offset_x
             y = mouse_motion_event.y - the_widget.touch_offset_y
-            # debug.print ("on_touch_move: widget pos:", x, y, "parent:", the_widget.parent)
+            # TODO: Correct this debug_flag temporary print.
+            debug.print ("on_touch_move: widget pos:", x, y, "parent:", the_widget.parent)
 
             if the_widget.min_x != -1:
                 if x <= the_widget.min_x:
@@ -372,7 +373,7 @@ n                  (This means it left that widget without dispatching on_motion
         """
         if self.motion_over_widget_func is not None:
             self.motion_over_widget_func(self, self.motion_over_widget_args)
-                # self.easy_access_dnd_function_binds)
+            # self.easy_access_dnd_function_binds)
         else:
             pass
             # debug.print "FUNCTION MOTION OVER NONE"
@@ -414,10 +415,13 @@ n                  (This means it left that widget without dispatching on_motion
     def on_drag_start(self, mouse_motion_event):
         if self._drag_started:
             return
+        debug.print("STARTING DRAG. Remove?", self.remove_on_drag, definitely=True)
+        debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func), definitely=True)
         if self.remove_on_drag:
             self._dragged = True
+            debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func))
             if self.drag_start_func is not None:
-                self.drag_start_func(self, self.drag_start_args)
+                self.drag_start_func(self.drag_start_args)
             self.set_drag_start_state()
             self.root_window = self.parent.get_root_window()
             self.root_parent(self)
@@ -593,7 +597,8 @@ n                  (This means it left that widget without dispatching on_motion
             debug.print ("self.reborn(), add ", childs, "to", self._old_parent)
             self._old_parent.add_widget(childs)
         return
-        #As of this moment, this code is unreachable- it's a placeholder.
+        #
+        # As of this moment, this code is unreachable- it's a placeholder.
         # See https://github.com/kivy/kivy/issues/4497
         self._old_parent.add_widget(self, index=self._old_index)
 
@@ -821,6 +826,15 @@ class DropDestination(Widget):
     def on_motion_over(self, motion_xy_tuple):
         """
         Called when your touch point crosses into a DropDestination object.
+        Self is added as an argument because if you set this up in a .kv file, the self
+        given there is always the self of the object created in the .kv file.
+        For example, if you want to create a copy of the object in the Python code, the self
+        will still refer to the self of the original object.
+
+        TODO: Doesn't this apply exclusively to DragNDropWidgets? This should not be a problem
+        in DragDestination widgets, because the library is not creating copies of these
+        objects.
+
         :return:
         """
         # debug.print "DropDestination: MOTION over", motion_xy_tuple
