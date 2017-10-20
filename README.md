@@ -3,11 +3,14 @@ Python library for the Kivy framework that enables drag-n-drop of widgets. Sourc
 https://github.com/GreyGnome/KivyDnD .
 
 This work is an update of Pavel Kostelnik's master thesis code found on:
-http://kostasprogpramming.blogspot.cz/2012/10/kivy-framework-drag-n-drop-widget.html
+http://kostasprogramming.blogspot.com/2012/10/kivy-framework-drag-n-drop-widget.html
 He did a great job and created a solid foundation. I needed a drag-and-drop
 framework and decided to build on his work. While doing this, I found Pavel and he
 agreed to release the library under the Apache 2.0 license.
 
+Additional coding by Edvardas Dlugauskas: Significant restructuring of the project,
+added setup.py functionality, general code cleanup. It's nice to have another pair
+of eyes on the project. Thanks, Edvardas!
 # Description
 ## DragNDropWidget
 A widget subclassed from this class will be able to be picked up and moved
@@ -128,7 +131,8 @@ Copy the `dragndropwidget.py` file there.
 | motion_inside_widget_func | self, motion_inside_widget_args | The user-defined method or function that will be called when your touch point moves inside the boundaries of this DropDestination object. |
 
 # Example
-Here's a complete, working example. For more examples check the distribution.
+Here's a complete, working example. For more examples check the distribution's
+**examples** folder.
 For more information, see **API** below.
 ```Python
 # File: DnDExample1.py
@@ -217,8 +221,11 @@ a ListProperty that accompanies it, named with an "args" suffix rather than "fun
 For example, `failed_drop_func` has `failed_drop_args`. The one exception is `while_dragging_func`;
 there is no `while_dragging_args`.
 
-Note that the first argument for each function after `self` is the widget that called it. This is
-built in to the library.
+Note that the first argument given to each function after `self` is the widget that called it. This is
+built in to the library. It's necessary because if you create a widget in
+a KV language block, whenever it's dragged `self` is the object you created.
+Normally that's fine, unless you're not removing the object upon drag. Then
+you want a reference to the copy, not the original.n
 * `drop_func`
   * If defined in your DragNDropWidget subclass, this function is called on a successful drop.
   * If defined in the object being dropped onto, a function by this name will be called when a
