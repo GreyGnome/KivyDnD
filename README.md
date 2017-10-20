@@ -1,4 +1,7 @@
 # KivyDnD
+NOTE: Version 0.3 brought some file rearrangement. Check the examples for the new
+directory name and usage.
+
 Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
 https://github.com/GreyGnome/KivyDnD .
 
@@ -32,11 +35,11 @@ its boundaries, and when it leaves. See the code for more information.
 Create a subdirectory somewhere alongside your executable. Put all the files in this repo
 into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
 `DragNDropWidget`. Example: assume
-* that I have a subdirectory "dragndropwidget" wherein
+* that I have a subdirectory "kivydnd" wherein
 * I have the file "dragndropwidget.py",
 then place in your python file:
 ```PythonStub
-from dragndropwidget.dragndropwidget import DragNDropWidget
+from kivydnd.dragndropwidget import DragNDropWidget
 
 class DraggableButton(Button, DragNDropWidget):
     def __init__(self, **kw):
@@ -47,9 +50,9 @@ specific about your subclassing. That is:
 
 ```Python
 # Here's the directory and module
-import dragndropwidget.dragndropwidget
+import kivydnd.dragndropwidget
 
-class DraggableButton(Button, dragndropwidget.dragndropwidget.DragNDropWidget):
+class DraggableButton(Button, kivydnd.dragndropwidget.DragNDropWidget):
     def __init__(self, **kw):
         super(DraggableButton, self).__init__(**kw)
 ```
