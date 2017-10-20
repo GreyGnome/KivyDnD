@@ -30,7 +30,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 
-from kivydnd.dndwidgets import DragNDropWidget
+from kivydnd.dragndropwidget import DragNDropWidget
 
 debug = Debug(False)
 
