@@ -414,10 +414,19 @@ n                  (This means it left that widget without dispatching on_motion
         copy_of_self.is_double_tap = self.is_double_tap
 
     def on_drag_start(self, mouse_motion_event):
+        """
+        When a drag starts, the widget is removed from its parent and added to the root window.
+        If self.remove_on_drag is false, it's a copy which means the copy is added to the root window.
+
+        :param mouse_motion_event: Sent to us by Kivy. Contains .x and .y of the event, among, for
+        example: is_double_tap(bool), is_touch(bool), is_triple_tap(bool), pos(tuple), time_start(float), etc.
+        :return:
+        """
         if self._drag_started:
             return
-        debug.print("STARTING DRAG. Remove?", self.remove_on_drag, definitely=True)
-        debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func), definitely=True)
+        debug.print("STARTING DRAG. Remove?", self.remove_on_drag)
+        debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func))
+        debug.print("Event:", mouse_motion_event)
         if self.remove_on_drag:
             self._dragged = True
             debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func))
