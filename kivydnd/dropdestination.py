@@ -131,8 +131,15 @@ class DropDestination(Widget):
         # debug.print "Self.to_window:", self.to_window(self.x, self.y)
         # TODO: I believe I have compensated for any relative widget, here.
         # TODO: ...but be wary. I'm still not sure about how RelativeLayout will behave.
+        #debug.print("START motion", self, "window coords (self):",
+        #            self.to_window(motion_xy_tuple[0], motion_xy_tuple[1]),
+        #            definitely=True)
+        #debug.print("Coords of motion:", motion_xy_tuple[0], motion_xy_tuple[1],
+        #            definitely=True)
+        # "self x,y,w,h:", self.x, self.y, self.width, self.height,
         if self.absolute_collide_point(motion_xy_tuple[0], motion_xy_tuple[1]):
-            # debug.print motionevent[0], on_[1], "pointer collides DropDestination:", self
+            # debug.print(motion_xy_tuple[0], motion_xy_tuple[1], "pointer collides",
+            #             self, definitely=True)
             if self.in_me:
                 self.dispatch("on_motion_inside", motion_xy_tuple)
             else:
@@ -147,10 +154,16 @@ class DropDestination(Widget):
                 self.dispatch("on_motion_outside", motion_xy_tuple)
 
     def absolute_collide_point(self, x, y):
+        """
+
+        :param x: x-value of a point in *Window* coordinates
+        :param y: y-value of a point in *Window* coordinates
+        :return: True or False
+        """
         (my_x, my_y)=self.to_window(self.x, self.y)
-        (event_x, event_y) = self.to_window(x, y)
-        # debug.print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
-        return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
+        #debug.print("absolute_collide_point:", self, "x,y,r,t:", my_x, my_y, self.width + my_x, my_y + self.height,
+        #            definitely=True)
+        return my_x <= x <= (self.width + my_x) and my_y <= y <= (my_y + self.height)
 
     def on_motion_flee(self, motion_xy_tuple):
         """
