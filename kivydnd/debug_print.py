@@ -1,6 +1,7 @@
 from __future__ import print_function
 import traceback
 import sys
+import kivy.core.window._window_sdl2
 
 # There are two ways to use this: as a Singleton, all controlled by this global
 # debug_flag. Or you can instantiate an object of class Debug, and print using the
@@ -62,3 +63,19 @@ class Debug():
         method = this_entry[2] + "()"
         method = "%-15s" % method
         print(basename + ":" + str(this_entry[1]), method, *args)
+
+    def print_widget_ancestry(self, widget, *args, **kwargs):
+        definitely = kwargs.get('definitely',False)
+        if not definitely:
+            if not self.debug_flag:
+                return
+        self.print ("ancestry:", widget, definitely=definitely)
+        i=0
+        while not isinstance(widget, kivy.core.window.window_sdl2.WindowSDL):
+            print ("ancestry:", widget.parent)
+            widget=widget.parent
+            i = i + 1
+            if i > 20:
+                print ("ancestry: too deep, introspection ended.")
+                return (0)
+        return(1)
