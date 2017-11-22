@@ -292,7 +292,7 @@ class DragNDropWidget(Widget):
                     if drag_destinations_dict.get(drop_group) is not None:
                         for drag_destination in drag_destinations_dict.get(drop_group):
                             if drag_destination.while_dragging_func is not None:
-                                if drag_destination.absolute_collide_point(mouse_motion_event.x, mouse_motion_event.y):
+                                if drag_destination.absolute_collide_point(Window.mouse_pos[0], Window.mouse_pos[1]):
                                     drag_destination.while_dragging_func(the_widget, mouse_motion_event)
 
     # DEPRECATED.................................................................
@@ -455,9 +455,8 @@ n                  (This means it left that widget without dispatching on_motion
             copy_of_self.root_parent(copy_of_self)
             copy_of_self.pos = self.pos
 
-    def absolute_collide_point(self, x, y):
+    def absolute_collide_point(self, event_x, event_y):
         (my_x, my_y)=self.to_window(self.x, self.y)
-        (event_x, event_y) = self.to_window(x, y)
         # debug.print "absolute_collide_point:", self, "x,y,w,h:", my_x, my_y, self.right + my_x, my_y + self.top
         return my_x <= event_x <= (self.width + my_x) and my_y <= event_y <= (my_y + self.height)
 
