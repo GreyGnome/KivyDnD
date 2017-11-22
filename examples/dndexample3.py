@@ -96,7 +96,7 @@ FloatLayout:
 
     Label:
         id: lower_to_box
-        text: 'drag down low (if you can) for some effect'
+        text: 'drag down low (if you can). Check console output.'
         canvas.before:
             Color:
                 rgb: 0.4, 0.8, 0.4
@@ -129,7 +129,7 @@ class DnDExample3(App):
     def build(self):
         return Builder.load_string(kv)
 
-    def greet(self, arg1=None, arg2=None):
+    def greet(self, arg1=None, arg2=None, arg3=None):
         print("GREETINGS FROM APP!!!")
         print("Dragging done!!!", end=' ')
         print(str(arg1), str(arg2))
