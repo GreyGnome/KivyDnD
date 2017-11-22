@@ -51,10 +51,10 @@ class DraggableButton(Button, DragNDropWidget):
     def __deepcopy__(self, dumb):
         return DraggableButton(text=self.text)
 
-    def greet(self, object):
+    def greet(self, object, arg2):
         print("greetings from DROPBUTTON")
 
-    def oops(self, calling_widget, kv_root, app):
+    def oops(self, calling_widget):
         print("oops() Args:", self, calling_widget, kv_root, app)
         app.oops(calling_widget, kv_root, app)
         print("OOOPS!!!")
