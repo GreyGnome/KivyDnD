@@ -32,6 +32,11 @@ groups. Another feature is that a DropDestination can fire an event when the poi
 its boundaries, and when it leaves. See the code for more information. 
 
 # Usage
+Extract the package, and cd into the dragndropwidget diretory. Then run:
+`sudo python setup.py`
+
+Or (the old-fashioned way):
+
 Create a subdirectory somewhere alongside your executable. Put all the files in this repo
 into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
 `DragNDropWidget`. Example: assume
