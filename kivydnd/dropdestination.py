@@ -17,6 +17,7 @@
 
 # File: DragNDropWidget.py
 #       the drag and drop widget library for Kivy.
+# Version 0.4
 from __future__ import print_function
 
 import copy
@@ -30,6 +31,18 @@ from kivy.uix.widget import Widget
 from .debug_print import Debug
 
 debug = Debug() # Is False by default.
+DEBUG_COLLIDE_POINT=0x00
+DEBUG_BIND_DROP_GROUP=0x00
+DEBUG_BIND_MOUSE_MOTION=0x00
+DEBUG_ON_MOTION=0x00
+DEBUG_ON_MOTION_FLEE=0x00
+DEBUG_ON_MOTION_OVER=0x00
+DEBUG_ON_MOTION_OUTSIDE=0x00
+DEBUG_ON_MOTION_INSIDE=0x00
+
+debug.register = DEBUG_COLLIDE_POINT | DEBUG_BIND_DROP_GROUP |\
+                 DEBUG_BIND_MOUSE_MOTION | DEBUG_ON_MOTION | DEBUG_ON_MOTION_FLEE |\
+                 DEBUG_ON_MOTION_OVER | DEBUG_ON_MOTION_OUTSIDE | DEBUG_ON_MOTION_INSIDE
 
 import dnd_storage_singletons
 draggables_dict=dnd_storage_singletons.draggables_dict
@@ -92,13 +105,15 @@ class DropDestination(Widget):
         # TODO: close all children (they have bound properties, too!
 
     def bind_drop_group(self, arg1, arg2):
-        # debug.print "BINDING DROP GROUP"
+        global DEBUG_BIND_DROP_GROUP
+        # debug.print ("BINDING DROP GROUP", level=DEBUG_BIND_DROP_GROUP)
         if self.drop_group not in drag_destinations_dict:
             drag_destinations_dict[self.drop_group]={}
         drag_destinations_dict[self.drop_group][self]=True
 
     def bind_mouse_motion(self, instance, value):
-        # debug.print "DropDestination: BINDNG WIDGETS to Mouse Motion!", instance, value
+        global DEBUG_BIND_MOUSE_MOTION
+        # debug.print ("DropDestination: BINDNG WIDGETS to Mouse Motion!", instance, value, level=DEBUG_BIND_MOUSE_MOTION
         if self.motion_is_bound_to_window is False:
             Window.bind(mouse_pos=self.on_motion)
         self.motion_is_bound_to_window = True
@@ -125,6 +140,7 @@ class DropDestination(Widget):
         :param motion_xy_tuple: The coordinates of the mouse in the Window's coordinate system
         :return:
         """
+        global DEBUG_ON_MOTION
         # debug.print "event x,y:", motionevent[0], motionevent[1], "self x,y,w,h:", self.x, self.y, self.width, self.height
         # debug.print "event x,y:", motionevent[0], motionevent[1], "self:", self
         # motionevent is in the main Window's coordinate system.
@@ -133,13 +149,13 @@ class DropDestination(Widget):
         # TODO: ...but be wary. I'm still not sure about how RelativeLayout will behave.
         #debug.print("START motion", self, "window coords (self):",
         #            self.to_window(motion_xy_tuple[0], motion_xy_tuple[1]),
-        #            definitely=True)
+        #            level=DEBUG_ON_MOTION)
         #debug.print("Coords of motion:", motion_xy_tuple[0], motion_xy_tuple[1],
-        #            definitely=True)
+        #            level=DEBUG_ON_MOTION)
         # "self x,y,w,h:", self.x, self.y, self.width, self.height,
         if self.absolute_collide_point(motion_xy_tuple[0], motion_xy_tuple[1]):
             # debug.print(motion_xy_tuple[0], motion_xy_tuple[1], "pointer collides",
-            #             self, definitely=True)
+            #             self, level=DEBUG_ON_MOTION)
             if self.in_me:
                 self.dispatch("on_motion_inside", motion_xy_tuple)
             else:
@@ -160,9 +176,19 @@ class DropDestination(Widget):
         :param y: y-value of a point in *Window* coordinates
         :return: True or False
         """
+        global DEBUG_COLLIDE_POINT
         (my_x, my_y)=self.to_window(self.x, self.y)
-        #debug.print("absolute_collide_point:", self, "x,y,r,t:", my_x, my_y, self.width + my_x, my_y + self.height,
-        #            definitely=True)
+        if Window.mouse_pos[0] != x or Window.mouse_pos[1] != y:
+            try:
+                debug.print("Title:", self.title(), "==========================", level=DEBUG_COLLIDE_POINT)
+            except:
+                pass
+            debug.print("point, x,y:       ", x, y, level=DEBUG_COLLIDE_POINT)
+            debug.print("Window mouse pos:", Window.mouse_pos, level=DEBUG_COLLIDE_POINT)
+            debug.print("me:", self, level=DEBUG_COLLIDE_POINT)
+            debug.print("x,y,r,t:", my_x, my_y, self.width + my_x, my_y + self.height,
+                        level=DEBUG_COLLIDE_POINT)
+        #debug.print_widget_ancestry(self, level=DEBUG_COLLIDE_POINT)
         return my_x <= x <= (self.width + my_x) and my_y <= y <= (my_y + self.height)
 
     def on_motion_flee(self, motion_xy_tuple):
@@ -170,6 +196,7 @@ class DropDestination(Widget):
         Called when your touch point leaves a draggable item.
         :return:
         """
+        global DEBUG_ON_MOTION_FLEE
         # debug.print "DropDestination: MOTION flee"
         if self.motion_flee_widget_func is not None:
             self.motion_flee_widget_func(self, self.motion_flee_widget_args)
@@ -194,6 +221,7 @@ class DropDestination(Widget):
 
         :return:
         """
+        global DEBUG_ON_MOTION_OVER
         # debug.print "DropDestination: MOTION over", motion_xy_tuple
         if self.motion_over_widget_func is not None:
             self.motion_over_widget_func(self, self.motion_over_widget_args)
@@ -202,6 +230,7 @@ class DropDestination(Widget):
         #    debug.print "FUNCTION MOTION OVER NONE"
 
     def on_motion_outside(self, motion_xy_tuple):
+        global DEBUG_ON_MOTION_OUTSIDE
         # debug.print "DropDestination: MOTION outside"
         try:
             if self.motion_outside_widget_func is not None:
@@ -213,6 +242,7 @@ class DropDestination(Widget):
             pass
 
     def on_motion_inside(self, motion_xy_tuple):
+        global DEBUG_ON_MOTION_INSIDE
         # debug.print "on_motion_inside: DropDestination INSIDE"
         try:
             if self.motion_inside_widget_func is not None:

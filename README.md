@@ -1,8 +1,8 @@
 # KivyDnD
-NOTE: Version 0.3 brought some file rearrangement. Check the examples for the new
-directory name and usage.
+NOTE: Version 0.4 will bring a philosophical and technical change to the deepcopy of
+widgets during a copy-and-drag operation. See the Release Notes for more information.
 
-Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
+KivyDnD is a Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
 https://github.com/GreyGnome/KivyDnD .
 
 This work is an update of Pavel Kostelnik's master thesis code found on:
@@ -32,17 +32,16 @@ groups. Another feature is that a DropDestination can fire an event when the poi
 its boundaries, and when it leaves. See the code for more information. 
 
 # Usage
+## Installation
 Extract the package, and cd into the dragndropwidget diretory. Then run:
 `sudo python setup.py`
 
-Or (the old-fashioned way):
+## Importing and Using
 
-Create a subdirectory somewhere alongside your executable. Put all the files in this repo
-into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
-`DragNDropWidget`. Example: assume
-* that I have a subdirectory "kivydnd" wherein
-* I have the file "dragndropwidget.py",
-then place in your python file:
+Import the dragndropwidget.py file.
+ 
+Create a widget and subclass
+`DragNDropWidget`. Example: place in your python file:
 ```PythonStub
 from kivydnd.dragndropwidget import DragNDropWidget
 
@@ -61,10 +60,14 @@ class DraggableButton(Button, kivydnd.dragndropwidget.DragNDropWidget):
     def __init__(self, **kw):
         super(DraggableButton, self).__init__(**kw)
 ```
-In your .kv file (or Kivy language code section), include a declaration of
-your DragNDropWidget which defines the `drop_func` and `failed_drop_func`
-(if you want). Objects that are able to be dropped onto must have an id
-defined. The id will match one of the id's listed in `droppable_zone_objects`.
+Next, in your .kv file (or Kivy language code section), include a declaration of
+your DragNDropWidget which defines the `drop_func` and (if you want) `failed_drop_func`.
+Objects that are able to be dropped onto must have an id
+defined. The id will match one of the id's listed in `droppable_zone_objects`, which will
+determine which widgets you can drop this DragNDropWidget onto. Here we call the id
+`id_of_a_widget`, but it can be called anything you want, like `flatulent_fuzzbombs` or
+`laughing_llamas_are_ludicrous`. As long as the DragNDropWidget and widget(s) to be
+dropped upon match.
 ```
     DraggableButton:
         text: 'Button 1'
@@ -74,26 +77,8 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
         size_hint: None, None
         size: 100, 100 
 ```
-
-You can define a directory in your `sys.path` and put the library file there:
-
-```PythonStub
-sys.path.append("/path/to/directory/containing/dragndropwidget.py")
-
-from dragndropwidget import DragNDropWidget
-```
-
-You can find the already-defined directories in your `sys.path` and put the library file there:
-
-*(run python on your command line, then...)*
-```PythonStub
-from __future__ import print_function
-import sys
-print ('\n'.join(sys.path))
-```
-...choose one of the directories that are printed, probably something like
-`/usr/lib/python3.5/site-packages` or `/usr/lib/python2.7/site-packages` or the like.
-Copy the `dragndropwidget.py` file there.
+See the example code below. There are also 4 or 5 examples delivered with the library,
+in increasing complexities. See them for more on how to use the library.
 
 ## Member Summary
 ### DragNDropWidget
@@ -118,7 +103,7 @@ Copy the `dragndropwidget.py` file there.
 | drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object. |
 | **Methods** | arguments |  |
 | drop_func | self, drop_args | The user-defined method or function that will be run at the end of a successful drop. |
-| while_draggingn_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
+| while_dragging_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
 | failed_drop_func | self, failed_drop_args | The user-defined method or function that will be run at the end of a failed drop. |
 | motion_over_widget_func | self, motion_over_widget_args | The user-defined method or function that will be run when the pointer enters the boundaries of this widget. |
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
@@ -229,11 +214,13 @@ a ListProperty that accompanies it, named with an "args" suffix rather than "fun
 For example, `failed_drop_func` has `failed_drop_args`. The one exception is `while_dragging_func`;
 there is no `while_dragging_args`.
 
-Note that the first argument given to each function after `self` is the widget that called it. This is
+Note that the first argument given to each function after `self` is the widget that
+called it. This is
 built in to the library. It's necessary because if you create a widget in
-a KV language block, whenever it's dragged `self` is the object you created.
-Normally that's fine, unless you're not removing the object upon drag. Then
-you want a reference to the copy, not the original.n
+a KV language block, whenever it's dragged `self` is the object you created in the KV
+language..
+Normally that's fine, unless you're dragging a copy. Then
+you want a reference to the copy, not the original.
 * `drop_func`
   * If defined in your DragNDropWidget subclass, this function is called on a successful drop.
   * If defined in the object being dropped onto, a function by this name will be called when a
@@ -250,30 +237,32 @@ you want a reference to the copy, not the original.n
   * If defined in your DragNDropWidget subclass, this function is called when the widget senses that
   a drag has begun.
 
-If you assign any of these `on_motion_...` functions, on_motion events are bound to the
-kivy.core.Window (the main Window that encloses your Kivy program). on_motion events are dispatched
-with each move of the pointer.
-
 ### Event Generation
 #### Events
-Subsequently, one of three events may then be dispatched by an on_motion event, depending on if you
-assign a function to these Properties:
+
+If you assign a method to any of these `on_motion_...` Properties, `on_motion events` are
+bound to the
+kivy.core.Window (the main Window that encloses your Kivy program). 'on_motion events' are
+dispatched
+with each move of the pointer:
 * `on_motion_over` when the pointer crosses from outside the widget to inside the widget
 * `on_motion_flee` when the pointer cross out from inside the widget
 * `on_motion_outside` if the pointer is moved anywhere outside the bounds of the widget. This can
-be quite chatty, as it's called for all DragNDropWidgets that are bound to on_motion events.
+be quite chatty, as it's called for all DragNDropWidgets that are bound to 'on_motion'
+events.
 
 ### Event Methods Called
 * `motion_over_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called whenever the pointer
+  * If defined in your DragNDropWidget subclass, this method will be called whenever the pointer
   enters into the widget. It is called once, upon entry.
 * `motion_flee_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called whenever the pointer
+  * If defined in your DragNDropWidget subclass, this method will be called whenever the pointer
   leaves the widget. It is called once, upon crossing out of the widget.
 * `motion_outside_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called for all pointer
-  motions that are not inside each and every widget that defines this function. Of course, it will
-  not be called on the widget you are currently inside, if you are currently inside one.
+  * If defined in your DragNDropWidget subclass, this method will be called for all pointer
+  motions that are not inside each and every widget that defines this method. Of course, it
+  will not be called on the widget you are currently inside, if you are currently inside
+  one.
 
 ### Called After a Drop
 At the end of a drag and drop, the `on_drag_finish()` method is called. Its job is to find any
@@ -282,8 +271,8 @@ call the appropriate user-defined functions. It may then call the ending animati
 performs cleanup. The order of methods called from `on_drag_finish()` is as follows:
 
 * If there was at least one successful drop:
- * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation.
- Then:
+ * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop
+ Animation. Then:
   * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more
   recipients.
    * Call `self.drop_func()`, if defined.

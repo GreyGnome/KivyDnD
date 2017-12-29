@@ -33,7 +33,14 @@ from kivy.uix.label import Label
 from kivydnd.dragndropwidget import DragNDropWidget
 
 debug = Debug(False)
+DEBUG_ON_TOUCH_UP=0x00
+DEBUG_POST_DROP_FUNC=0x00
+DEBUG_ON_SUCCESSFUL_DROP=0x00
+DEBUG_ON_UNSUCCESSFUL_DROP=0x00
+DEBUG_OOPS=0x04
 
+debug.register = DEBUG_ON_TOUCH_UP | DEBUG_POST_DROP_FUNC | DEBUG_ON_SUCCESSFUL_DROP |\
+                 DEBUG_ON_UNSUCCESSFUL_DROP | DEBUG_OOPS
 
 class DraggableButton(Button, DragNDropWidget):
     '''
@@ -54,18 +61,33 @@ class DraggableButton(Button, DragNDropWidget):
     def greet(self, object, arg2):
         print("greetings from DROPBUTTON")
 
-    def oops(self, calling_widget):
-        print("oops() Args:", self, calling_widget, kv_root, app)
-        app.oops(calling_widget, kv_root, app)
+    def oops(self, calling_widget, *args):
+        '''
+
+        :param args: The 0'th argument (after self, that is) is the object that called
+        this method. Because it may not be the same as self. Any additional arguments
+        come after in the list of arguments.
+        :return:
+        '''
+        global DEBUG_OOPS
+        debug.print("Self:", self, "caller:", calling_widget, level=DEBUG_OOPS)
+        i=0
+        for arg in args:
+            debug.print("Arg:", i, args[i], level=DEBUG_OOPS)
+            i += 1
+        # app.oops(calling_widget)
         print("OOOPS!!!")
 
     def on_successful_drop(self, arg1=None, arg2=None):
+        global DEBUG_ON_SUCCESSFUL_DROP
         super(DraggableButton, self).on_successful_drop()
-        print("on_successful_drop: Run overridden method")
+        debug.print("Run overridden method", level=DEBUG_ON_SUCCESSFUL_DROP)
 
     def on_unsuccessful_drop(self, arg1=None, arg2=None):
+        global DEBUG_ON_UNSUCCESSFUL_DROP
         super(DraggableButton, self).on_unsuccessful_drop(arg1, arg2)
-        print("on_unsuccessful_drop: Run overridden method")
+        # TODO: DEBUG THIS!
+        debug.print("Run overridden method", level=DEBUG_ON_UNSUCCESSFUL_DROP)
 
 
 class DragDestinationLabel(Label):
@@ -123,15 +145,16 @@ class DragSourceBoxLayout(BoxLayout):
 
         See :meth:`on_touch_down` for more information.
         '''
-        print ("--- START START START TOUCH UP --- on_touch_up: DragSourceBoxLayout", self, "Kids:", self.children)
-        print ("touch start:", touch.time_start)
+        global DEBUG_ON_TOUCH_UP
+        debug.print ("--- START START START TOUCH UP ---", self, "Kids:", self.children, level=DEBUG_ON_TOUCH_UP)
+        debug.print ("touch start:", touch.time_start, level=DEBUG_ON_TOUCH_UP)
         super(DragSourceBoxLayout, self).on_touch_up(touch)
 
-
     def post_drop_func(self, arg1):
-        print ("DragSourceBoxLayout:post_drop_func: TODO: HOW to get this copied widget to parent here...?")
-        print ("DragSourceBoxLayout:post_drop_func: Arg1:", arg1, "parent:", arg1.parent)
-        print ("DragSourceBoxLayout:post_drop_func: Dropped here", self)
+        global DEBUG_POST_DROP_FUNC
+        debug.print ("DragSourceBoxLayout:post_drop_func: TODO: HOW to get this copied widget to parent here...?", level=DEBUG_POST_DROP_FUNC)
+        debug.print ("DragSourceBoxLayout:post_drop_func: Arg1:", arg1, "parent:", arg1.parent, level=DEBUG_POST_DROP_FUNC)
+        debug.print ("DragSourceBoxLayout:post_drop_func: Dropped here", self, level=DEBUG_POST_DROP_FUNC)
         # TODO: This is not right. What am I trying to do here?
         if arg1.parent == None:
             self.add_widget(arg1)

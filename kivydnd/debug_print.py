@@ -1,3 +1,26 @@
+# -*- coding: UTF-8 -*-
+#    Copyright 2017 Michael Schwager
+
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+# File: debug_print.py
+#       print debugging information with various controls, because I generally
+#       program in bugs (my language of choice).
+#
+#       ...that's a joke.
+#
+#       This only works with kivy. That's not a joke.
+
 from __future__ import print_function
 import traceback
 import sys
@@ -46,15 +69,46 @@ class Debug():
     That is, it prints:
 
     filename:line_number method()  <your_text_here>
+
+    If debug_flag is False, printing will be shut off. However, this can be overridden
+    see the print() method.
     """
-    def __init__(self, debug_flag=False):
-        self.debug_flag = debug_flag
+    def __init__(self, *args, **kwargs):
+        """
+
+        :param debug_flag: This is a normal argument. Value: True or False.
+        False will disable debug output.
+        :param register:  This is a keyword argument. Set to a hexadecimal value,
+        which would be considered a debug level. If during your debug.print() call
+        you give it a "level" keyword argument, the level will be AND'ed against the
+        register variable. If true, the debug.print() will generate output.
+
+        For example:
+        debug = Debug(register=0x01)
+        """
+        global debug_flag
+        self.debug_flag=debug_flag
+        for arg in args:
+            self.debug_flag = arg
+        self.register = kwargs.pop("register", 0x00)
 
     def print(self, *args, **kwargs):
-        definitely = kwargs.get('definitely',False)
+        """
+        If the debug_flag is False this will not print. However, this can be overridden
+        by either:
+        1. By setting the keyword "definitely" to "True" in the debug.print() call, or
+        2. By setting the keyword "level" to a hexadecimal flag value. If that value when
+           AND-ed with
+        :param args: The stuff to be printed.
+        :param kwargs: definitely, or level
+        :return: nothing
+        """
+        definitely = kwargs.pop('definitely', False)
+        level = kwargs.pop('level', 0x00)
         if not definitely:
-            if not self.debug_flag:
-                return
+            if not (level & self.register):
+                if not self.debug_flag:
+                    return
         trace = traceback.extract_stack()
         # print (len(trace))
         this_entry = trace[len(trace) - 2]
@@ -62,7 +116,7 @@ class Debug():
         basename = "%-10s" % basename[len(basename) - 1]
         method = this_entry[2] + "()"
         method = "%-15s" % method
-        print(basename + ":" + str(this_entry[1]), method, *args)
+        print(basename + ":" + str(this_entry[1]), method, args, kwargs)
 
     def print_widget_ancestry(self, widget, *args, **kwargs):
         definitely = kwargs.get('definitely',False)
