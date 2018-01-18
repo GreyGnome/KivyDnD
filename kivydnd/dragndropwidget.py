@@ -33,7 +33,7 @@ from debug_print import Debug
 debug = Debug() # Is False by default.
 DEBUG_TOUCH_UP=0x00
 DEBUG_TOUCH_MOVE=0x00
-DEBUG_DRAG_START=0x00
+DEBUG_DRAG_START=0x01
 DEBUG_COLLIDE_POINT=0x00
 DEBUG_DRAG_FINISH=0x00
 DEBUG_UNROOT_ME=0x00
@@ -467,7 +467,8 @@ n                  (This means it left that widget without dispatching on_motion
         else:
             #create copy of object to drag
             debug.print("Create copy, deep copy of: ", self.text, self, level=DEBUG_DRAG_START)
-            copy_of_self = copy.deepcopy(self)
+            # copy_of_self = copy.deepcopy(self)
+            copy_of_self = self.kivydnd_copy()
             # We'll handle those variables that are common to ALL d-n-d
             # widgets. The widgets' classes can handle specifics
             # (such as text, etc.)

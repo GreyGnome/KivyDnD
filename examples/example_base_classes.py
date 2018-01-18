@@ -55,8 +55,10 @@ class DraggableButton(Button, DragNDropWidget):
         self.size_hint = (None, None)
         self.text = hex(id(self))
 
-    def __deepcopy__(self, dumb):
-        return DraggableButton(text=self.text)
+    def kivydnd_copy(self):
+        copy = DraggableButton()
+        copy.text = "cp:" + copy.text
+        return copy
 
     def greet(self, object, arg2):
         print("greetings from DROPBUTTON")

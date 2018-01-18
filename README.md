@@ -1,6 +1,7 @@
 # KivyDnD
-NOTE: Version 0.4 will bring a philosophical and technical change to the deepcopy of
-widgets during a copy-and-drag operation. See the Release Notes for more information.
+NOTE: Version 0.5 will bring a philosophical and technical change to the deepcopy of
+widgets during a copy-and-drag operation. See the below, and the Release Notes,
+for more information. The code now stored on Github includes these changes.
 
 KivyDnD is a Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
 https://github.com/GreyGnome/KivyDnD .
@@ -14,7 +15,7 @@ agreed to release the library under the Apache 2.0 license.
 Additional coding by Edvardas Dlugauskas: Significant restructuring of the project,
 added setup.py functionality, general code cleanup. It's nice to have another pair
 of eyes on the project. Thanks, Edvardas!
-# Description
+# Class Descriptions
 ## DragNDropWidget
 A widget subclassed from this class will be able to be picked up and moved
 around in the main window, then dropped onto other chosen widgets. Then,
@@ -29,11 +30,11 @@ a draggable widget in a drop group can only be dropped into widgets
 in its same drop group. You can have multiple drop groups, any DragNDropWidget can be a
 member of multiple drop groups, and any DropDestination can be a member of multiple drop
 groups. Another feature is that a DropDestination can fire an event when the pointer enters
-its boundaries, and when it leaves. See the code for more information. 
+its boundaries, and when it leaves. See the code and examples for more information. 
 
 # Usage
 ## Installation
-Extract the package, and cd into the dragndropwidget diretory. Then run:
+Extract the package, and cd into the dragndropwidget directory. Then run:
 `sudo python setup.py`
 
 ## Importing and Using
@@ -67,7 +68,7 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`, w
 determine which widgets you can drop this DragNDropWidget onto. Here we call the id
 `id_of_a_widget`, but it can be called anything you want, like `flatulent_fuzzbombs` or
 `laughing_llamas_are_ludicrous`. As long as the DragNDropWidget and widget(s) to be
-dropped upon match.
+dropped upon have matching id's.
 ```
     DraggableButton:
         text: 'Button 1'
@@ -109,6 +110,7 @@ in increasing complexities. See them for more on how to use the library.
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
 | drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
+| kivydnd_copy | self | The user-defined method or function that will be called when a widget's remove_on_drag Property is set to False.   
 ### DropDestination
 | **Properties** | Type(default value) | Description |
 --- | --- | ---
@@ -345,9 +347,11 @@ In addition to the simple usage given above, the module has additional capabilit
 simplest case you would set `droppable_zone_objects` and those are the objects you can drop into.
 However, you can assign DragNDropWidget's to a `drop_group`, which is a Kivy StringProperty.
 Accordingly you must subclass a drop destination to the DropDestination class, and then assign
-it a drop_group. Your dragged widget, then, will only be droppable onto widgets in `drop_group`
+it to the same drop_group. Your dragged widget, then, will only be droppable onto widgets in
+that `drop_group`. You can make as many drop groups as you can manage.
 
 There are a number of Kivy Properties available.
+
 # Additional Capabilities and Notes:
 
 At the end of a drop, the widget is left with no parent. It is up to you to decide what to do with
