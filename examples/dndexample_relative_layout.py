@@ -126,9 +126,9 @@ DialogLabel:
 '''
 
 
-class app_relative_layout(App):
+class DnDExampleRelativeLayout(App):
     def __init__(self, **kw):
-        super(app_relative_layout, self).__init__(**kw)
+        super(DnDExampleRelativeLayout, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
@@ -160,4 +160,4 @@ class app_relative_layout(App):
         messagebox.flash()
 
 if __name__ == '__main__':
-    app_relative_layout().run()
+    DnDExampleRelativeLayout().run()

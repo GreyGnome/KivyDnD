@@ -18,10 +18,16 @@
 
 from __future__ import print_function
 
-from kivydnd.debug_print import debug_print
+from kivydnd.debug_print import Debug
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
+
+debug = Debug()
+DEBUG_GREET=0x00
+DEBUG_CYCLE_MESSAGE=0x00
+
+debug.register=DEBUG_GREET | DEBUG_CYCLE_MESSAGE
 
 kv = '''
 #:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
@@ -96,7 +102,7 @@ FloatLayout:
 
     Label:
         id: lower_to_box
-        text: 'drag down low (if you can) for some effect'
+        text: 'drag down low (if you can). Check console output.'
         canvas.before:
             Color:
                 rgb: 0.4, 0.8, 0.4
@@ -129,20 +135,22 @@ class DnDExample3(App):
     def build(self):
         return Builder.load_string(kv)
 
-    def greet(self, arg1=None, arg2=None):
+    def greet(self, arg1=None, arg2=None, arg3=None):
+        global DEBUG_GREET
         print("GREETINGS FROM APP!!!")
         print("Dragging done!!!", end=' ')
         print(str(arg1), str(arg2))
 
         # Debug
         for destination in arg1.drop_recipients:
-            debug_print("TEXT:", destination.text)
+            debug.print("TEXT:", destination.text, level=DEBUG_GREET)
             self.initial_text = destination.text
             self.flash_widget = destination
             Clock.schedule_interval(self.cycle_message, 0.5)
 
     def cycle_message(self, dt):
-        debug_print("CYCLE!!!!")
+        global DEBUG_CYCLE_MESSAGE
+        debug.print("CYCLE!!!!", level=DEBUG_CYCLE_MESSAGE)
         if self.i < 6:
             if self.toggle_text:
                 self.flash_widget.text = "from app.greet: YAY! DROPPED HERE!"
@@ -160,7 +168,7 @@ class DnDExample3(App):
         #print arg1, arg2
 
     def oops(self, arg1):
-        print("Ooops!")
+        print("Ooops! Message from the App: You can't drop there!")
 
 if __name__ == '__main__':
     DnDExample3().run()

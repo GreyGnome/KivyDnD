@@ -22,7 +22,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.button import Button
 
-from kivydnd.dndwidgets import DragNDropWidget
+from kivydnd.dragndropwidget import DragNDropWidget
 
 kv = '''
 FloatLayout:

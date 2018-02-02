@@ -1,14 +1,21 @@
 # KivyDnD
-Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
+NOTE: Version 0.5 will bring a philosophical and technical change to the deepcopy of
+widgets during a copy-and-drag operation. See the below, and the Release Notes,
+for more information. The code now stored on Github includes these changes.
+
+KivyDnD is a Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
 https://github.com/GreyGnome/KivyDnD .
 
 This work is an update of Pavel Kostelnik's master thesis code found on:
-http://kostasprogpramming.blogspot.cz/2012/10/kivy-framework-drag-n-drop-widget.html
+http://kostasprogramming.blogspot.com/2012/10/kivy-framework-drag-n-drop-widget.html
 He did a great job and created a solid foundation. I needed a drag-and-drop
 framework and decided to build on his work. While doing this, I found Pavel and he
 agreed to release the library under the Apache 2.0 license.
 
-# Description
+Additional coding by Edvardas Dlugauskas: Significant restructuring of the project,
+added setup.py functionality, general code cleanup. It's nice to have another pair
+of eyes on the project. Thanks, Edvardas!
+# Class Descriptions
 ## DragNDropWidget
 A widget subclassed from this class will be able to be picked up and moved
 around in the main window, then dropped onto other chosen widgets. Then,
@@ -23,17 +30,21 @@ a draggable widget in a drop group can only be dropped into widgets
 in its same drop group. You can have multiple drop groups, any DragNDropWidget can be a
 member of multiple drop groups, and any DropDestination can be a member of multiple drop
 groups. Another feature is that a DropDestination can fire an event when the pointer enters
-its boundaries, and when it leaves. See the code for more information. 
+its boundaries, and when it leaves. See the code and examples for more information. 
 
 # Usage
-Create a subdirectory somewhere alongside your executable. Put all the files in this repo
-into that subdirectory. Import the dragndropwidget.py file, then your widget must subclass
-`DragNDropWidget`. Example: assume
-* that I have a subdirectory "dragndropwidget" wherein
-* I have the file "dragndropwidget.py",
-then place in your python file:
+## Installation
+Extract the package, and cd into the dragndropwidget directory. Then run:
+`sudo python setup.py`
+
+## Importing and Using
+
+Import the dragndropwidget.py file.
+ 
+Create a widget and subclass
+`DragNDropWidget`. Example: place in your python file:
 ```PythonStub
-from dragndropwidget.dragndropwidget import DragNDropWidget
+from kivydnd.dragndropwidget import DragNDropWidget
 
 class DraggableButton(Button, DragNDropWidget):
     def __init__(self, **kw):
@@ -44,16 +55,20 @@ specific about your subclassing. That is:
 
 ```Python
 # Here's the directory and module
-import dragndropwidget.dragndropwidget
+import kivydnd.dragndropwidget
 
-class DraggableButton(Button, dragndropwidget.dragndropwidget.DragNDropWidget):
+class DraggableButton(Button, kivydnd.dragndropwidget.DragNDropWidget):
     def __init__(self, **kw):
         super(DraggableButton, self).__init__(**kw)
 ```
-In your .kv file (or Kivy language code section), include a declaration of
-your DragNDropWidget which defines the `drop_func` and `failed_drop_func`
-(if you want). Objects that are able to be dropped onto must have an id
-defined. The id will match one of the id's listed in `droppable_zone_objects`.
+Next, in your .kv file (or Kivy language code section), include a declaration of
+your DragNDropWidget which defines the `drop_func` and (if you want) `failed_drop_func`.
+Objects that are able to be dropped onto must have an id
+defined. The id will match one of the id's listed in `droppable_zone_objects`, which will
+determine which widgets you can drop this DragNDropWidget onto. Here we call the id
+`id_of_a_widget`, but it can be called anything you want, like `flatulent_fuzzbombs` or
+`laughing_llamas_are_ludicrous`. As long as the DragNDropWidget and widget(s) to be
+dropped upon have matching id's.
 ```
     DraggableButton:
         text: 'Button 1'
@@ -63,10 +78,13 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
         size_hint: None, None
         size: 100, 100 
 ```
+See the example code below. There are also 4 or 5 examples delivered with the library,
+in increasing complexities. See them for more on how to use the library.
+
 ## Member Summary
+### DragNDropWidget
 |Member Name |  Type(default value) | Description |
 --- | --- |---
-| **DragNDropWidget**  |   |   |
 | **Properties** |  |  |
 | droppable_zone_objects | ListProperty([]) | List of widgets that accept a drop of this widget. |
 | bound_zone_objects | ListProperty([]) | List of widgets; this widget cannot be dragged outside of the limits given by the outside boundaries of all the widgets in this list. See "dndapp2.py" for an example. |
@@ -86,14 +104,16 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object. |
 | **Methods** | arguments |  |
 | drop_func | self, drop_args | The user-defined method or function that will be run at the end of a successful drop. |
-| while_draggingn_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
+| while_dragging_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
 | failed_drop_func | self, failed_drop_args | The user-defined method or function that will be run at the end of a failed drop. |
 | motion_over_widget_func | self, motion_over_widget_args | The user-defined method or function that will be run when the pointer enters the boundaries of this widget. |
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
 | drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
-| **DropDestination**  |  |  |
+| kivydnd_copy | self | The user-defined method or function that will be called when a widget's remove_on_drag Property is set to False.   
+### DropDestination
 | **Properties** | Type(default value) | Description |
+--- | --- | ---
 | motion_over_widget_args | ListProperty([]) | List of arguments given to motion_over_widget_func (after `self`). |
 | motion_flee_widget_args | ListProperty([]) | List of arguments given to motion_flee_widget_func (after `self`). |
 | motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). | |
@@ -106,10 +126,11 @@ defined. The id will match one of the id's listed in `droppable_zone_objects`.
 | motion_inside_widget_func | self, motion_inside_widget_args | The user-defined method or function that will be called when your touch point moves inside the boundaries of this DropDestination object. |
 
 # Example
-Here's a complete, working example. For more examples check the distribution.
+Here's a complete, working example. For more examples check the distribution's
+**examples** folder.
 For more information, see **API** below.
 ```Python
-# File: dndexample.py
+# File: DnDExample1.py
 #       Simplest example of the DragNDropWidget Kivy library.
 #
 from __future__ import print_function
@@ -160,9 +181,9 @@ class  DraggableButton(Button, DragNDropWidget):
         super(DraggableButton, self).__init__(**kw)
 #
 #
-class dndexample(App):
+class DnDExample1(App):
     def __init__(self, **kw):
-        super(dndexample, self).__init__(**kw)
+        super(DnDExample1, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
@@ -175,7 +196,7 @@ class dndexample(App):
 
 
 if __name__ == '__main__':
-    dndexample().run()
+    DnDExample1().run()
 ```
 # API
 ## Classes:
@@ -195,8 +216,13 @@ a ListProperty that accompanies it, named with an "args" suffix rather than "fun
 For example, `failed_drop_func` has `failed_drop_args`. The one exception is `while_dragging_func`;
 there is no `while_dragging_args`.
 
-Note that the first argument for each function after `self` is the widget that called it. This is
-built in to the library.
+Note that the first argument given to each function after `self` is the widget that
+called it. This is
+built in to the library. It's necessary because if you create a widget in
+a KV language block, whenever it's dragged `self` is the object you created in the KV
+language..
+Normally that's fine, unless you're dragging a copy. Then
+you want a reference to the copy, not the original.
 * `drop_func`
   * If defined in your DragNDropWidget subclass, this function is called on a successful drop.
   * If defined in the object being dropped onto, a function by this name will be called when a
@@ -213,30 +239,32 @@ built in to the library.
   * If defined in your DragNDropWidget subclass, this function is called when the widget senses that
   a drag has begun.
 
-If you assign any of these `on_motion_...` functions, on_motion events are bound to the
-kivy.core.Window (the main Window that encloses your Kivy program). on_motion events are dispatched
-with each move of the pointer.
-
 ### Event Generation
 #### Events
-Subsequently, one of three events may then be dispatched by an on_motion event, depending on if you
-assign a function to these Properties:
+
+If you assign a method to any of these `on_motion_...` Properties, `on_motion events` are
+bound to the
+kivy.core.Window (the main Window that encloses your Kivy program). 'on_motion events' are
+dispatched
+with each move of the pointer:
 * `on_motion_over` when the pointer crosses from outside the widget to inside the widget
 * `on_motion_flee` when the pointer cross out from inside the widget
 * `on_motion_outside` if the pointer is moved anywhere outside the bounds of the widget. This can
-be quite chatty, as it's called for all DragNDropWidgets that are bound to on_motion events.
+be quite chatty, as it's called for all DragNDropWidgets that are bound to 'on_motion'
+events.
 
 ### Event Methods Called
 * `motion_over_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called whenever the pointer
+  * If defined in your DragNDropWidget subclass, this method will be called whenever the pointer
   enters into the widget. It is called once, upon entry.
 * `motion_flee_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called whenever the pointer
+  * If defined in your DragNDropWidget subclass, this method will be called whenever the pointer
   leaves the widget. It is called once, upon crossing out of the widget.
 * `motion_outside_widget_func`
-  * If defined in your DragNDropWidget subclass, this function will be called for all pointer
-  motions that are not inside each and every widget that defines this function. Of course, it will
-  not be called on the widget you are currently inside, if you are currently inside one.
+  * If defined in your DragNDropWidget subclass, this method will be called for all pointer
+  motions that are not inside each and every widget that defines this method. Of course, it
+  will not be called on the widget you are currently inside, if you are currently inside
+  one.
 
 ### Called After a Drop
 At the end of a drag and drop, the `on_drag_finish()` method is called. Its job is to find any
@@ -245,8 +273,8 @@ call the appropriate user-defined functions. It may then call the ending animati
 performs cleanup. The order of methods called from `on_drag_finish()` is as follows:
 
 * If there was at least one successful drop:
- * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation.
- Then:
+ * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop
+ Animation. Then:
   * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more
   recipients.
    * Call `self.drop_func()`, if defined.
@@ -319,9 +347,11 @@ In addition to the simple usage given above, the module has additional capabilit
 simplest case you would set `droppable_zone_objects` and those are the objects you can drop into.
 However, you can assign DragNDropWidget's to a `drop_group`, which is a Kivy StringProperty.
 Accordingly you must subclass a drop destination to the DropDestination class, and then assign
-it a drop_group. Your dragged widget, then, will only be droppable onto widgets in `drop_group`
+it to the same drop_group. Your dragged widget, then, will only be droppable onto widgets in
+that `drop_group`. You can make as many drop groups as you can manage.
 
 There are a number of Kivy Properties available.
+
 # Additional Capabilities and Notes:
 
 At the end of a drop, the widget is left with no parent. It is up to you to decide what to do with

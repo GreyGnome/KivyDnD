@@ -30,6 +30,8 @@ from kivy.uix.label import Label
 # Classes in the FloatLayout are defined in example_base_classes.py, included above.
 kv = '''
 #:import DragSourceBoxLayout example_base_classes.DragSourceBoxLayout
+#:import DraggableButton example_base_classes.DraggableButton
+#:import DragDestinationLabel example_base_classes.DragDestinationLabel
 
 FloatLayout:
     DragSourceBoxLayout:
@@ -110,9 +112,9 @@ class DialogLabel(Label):
             self.parent.remove_widget(self)
 
 
-class dndapp0(App):
+class DnDExampleCopyDraggable(App):
     def __init__(self, **kw):
-        super(dndapp0, self).__init__(**kw)
+        super(DnDExampleCopyDraggable, self).__init__(**kw)
 
     def build(self):
         return Builder.load_string(kv)
@@ -142,4 +144,4 @@ class dndapp0(App):
 
 
 if __name__ == '__main__':
-    dndapp0().run()
+    DnDExampleCopyDraggable().run()
