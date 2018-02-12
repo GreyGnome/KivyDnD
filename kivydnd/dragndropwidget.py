@@ -27,8 +27,9 @@ from kivy.core.window import Window
 from kivy.properties import (
 	ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
 from kivy.uix.widget import Widget
+from kivydnd import dnd_storage_singletons
 
-from debug_print import Debug
+from .debug_print import Debug
 
 debug = Debug() # Is False by default.
 DEBUG_TOUCH_UP=0x00
@@ -45,7 +46,7 @@ debug.register=DEBUG_TOUCH_UP | DEBUG_TOUCH_MOVE | DEBUG_DRAG_START | DEBUG_COLL
                DEBUG_DRAG_FINISH | DEBUG_UNROOT_ME | DEBUG_REBORN | DEBUG_SUCCESSFUL_DROP |\
                DEBUG_POST_SUCCESSFUL_ANIM
 
-import dnd_storage_singletons
+import kivydnd.dnd_storage_singletons
 
 draggables_dict=dnd_storage_singletons.draggables_dict
 drag_destinations_dict=dnd_storage_singletons.drag_destinations_dict
