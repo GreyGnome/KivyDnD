@@ -1,8 +1,12 @@
+
 Thu Jan 18 07:52:56 CST 2018 pre-Version 0.5:
 Changes regarding `deepcopy` have been made to the code. See the notes for Version 0.4,
 below. As of this version, if you are not deleting your widget upon drag (ie, you are
 making a copy), your widget that's being dragged will need to implement the
 `self.kivydnd_copy()` method, which must return a copy of the widget.
+
+In drag_start_func, the keyword "copy" contains a copy of the dragged widget, if 
+you're dragging a copy. Else it's `None`.
 
 Wed Dec 13 17:42:26 CST 2017 Version 0.4:
 Minor changes to dndexample3.py and example_base_classes.py. 
