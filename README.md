@@ -35,7 +35,8 @@ its boundaries, and when it leaves. See the code and examples for more informati
 # Usage
 ## Installation
 Extract the package, and cd into the dragndropwidget directory. Then run:
-`sudo python setup.py`
+
+`sudo python setup.py install`
 
 ## Importing and Using
 
@@ -109,7 +110,7 @@ in increasing complexities. See them for more on how to use the library.
 | motion_over_widget_func | self, motion_over_widget_args | The user-defined method or function that will be run when the pointer enters the boundaries of this widget. |
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
-| drag_start_func | self, drag_start_args | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. |
+| drag_start_func | self, drag_start_args, keyword args: "copy" | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. Regardless, the first argument to the method is the original "self" object because this function is called from the original widget. Therefore, the `copy_of_self` widget is given in keyword argument "copy"; pop it off the kwargs dict if you need it.|
 | kivydnd_copy | self | The user-defined method or function that will be called when a widget's remove_on_drag Property is set to False.   
 ### DropDestination
 | **Properties** | Type(default value) | Description |
