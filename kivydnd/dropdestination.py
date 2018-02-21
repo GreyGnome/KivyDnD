@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 #    Copyright 2016, 2015, 2014, 2013, 2012 Pavel Kostelnik
-#    Copyright 2017 Michael Schwager
+#    Copyright 2017, 2018 Michael Schwager
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
