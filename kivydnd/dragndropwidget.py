@@ -31,11 +31,11 @@ from kivy.uix.widget import Widget
 from debug_print import Debug
 
 debug = Debug() # Is False by default.
-DEBUG_TOUCH_UP=0x00
+DEBUG_TOUCH_UP=0x04
 DEBUG_TOUCH_MOVE=0x00
 DEBUG_DRAG_START=0x01
 DEBUG_COLLIDE_POINT=0x00
-DEBUG_DRAG_FINISH=0x00
+DEBUG_DRAG_FINISH=0x02
 DEBUG_UNROOT_ME=0x00
 DEBUG_REBORN=0x00
 DEBUG_SUCCESSFUL_DROP=0x00
@@ -176,6 +176,8 @@ class DragNDropWidget(Widget):
             self._old_index = -1
         else:
             self._old_index = self.parent.children.index(self)
+        debug.print("SET _drag_started", self, "=============================================",
+                    definitely=True)
         self._drag_started = True
 
     def set_drag_finish_state(self, set_opacity=True):
@@ -188,7 +190,7 @@ class DragNDropWidget(Widget):
         # TODO: (after current debugging on 6/17/17)
         if set_opacity:
             self.opacity = self._old_opacity
-        debug.print (" ****************** DRAG N DROP TOTALLY DONE *********************", level=DEBUG_DRAG_FINISH)
+        debug.print (" ****************** DRAG N DROP TOTALLY DONE *********************", self, level=DEBUG_DRAG_FINISH)
 
     def set_bound_axis_positions(self):
         for obj in self.bound_zone_objects:
@@ -208,10 +210,21 @@ class DragNDropWidget(Widget):
 
     def on_touch_down(self, touch):
         """
-        on_touch_down contains a numerical value. If the object is touched for a period longer than
-        this value then we may be entering a drag operation. The value should probably be made
-        configurable. As a matter of fact, I'm sure it should be. ...TODO.
-        
+        If we are a draggable object and the touch collides with us, we could be
+        embarking on a drag.
+
+        Kivy is knowledgeable about gestures and will send a touch down event immediately
+        if a touch up event quickly follows it, but it will delay an event if a touch
+        lingers.
+        TODO: Understand that mechanism.
+
+        on_touch_down contains a numerical value. If the object is touched for a period longer
+        than this value then we may be entering a drag operation. The value should probably be
+        made configurable. As a matter of fact, I'm sure it should be. ...TODO.
+
+        Note that if you hold down the touch, then after a short time the event will
+        be dispatched and touch.time_end will be -1.
+
         touch.is_double_tap is maintained by Kivy.
         self.is_double_tap is maintained by the widget, because we don't want on_touch_up to 
         set "am_touched" to be false too quickly..
@@ -219,42 +232,62 @@ class DragNDropWidget(Widget):
         :return:
         """
         # TODO: make the drag delay configurable
+        debug.print(self, "tap", definitely=True)
         if self.collide_point(touch.x, touch.y) and self._draggable:
             # detect if the touch is "long"... (if not, dispatch drag)
-            if (abs(touch.time_end - touch.time_start) > 0.1) or touch.is_double_tap:
+            if (abs(touch.time_end - touch.time_start) > 0.2) or touch.is_double_tap:
                 self.touch_offset_x = touch.x - self.x
                 self.touch_offset_y = touch.y - self.y
                 self.am_touched = True
+                debug.print(self, "was touched", definitely=True)
                 if touch.is_double_tap:
                     self.is_double_tap = True
-                    debug.print ( "DOUBLE TAPPED THIS ONE!", self)
+                    debug.print ("DOUBLE TAPPED THIS ONE!", self, self.is_double_tap, definitely=True)
+            else:
+                debug.print(self, "was tapped, but not logged as touched", definitely=True)
 
     def on_touch_up(self, mouse_motion_event):
         """
         In a double tap, this gets called after each tap, which sets am_touched to be False.
         So there's a bit of a complication, which is dealt with in the first if statement.
+
+        On regular touches, we're not going to do any dragging unless the touch had a
+        certain duration. If it's just a quick touch we should ignore it. This is the
+        'am_touched' variable.
+
         :param touch:
         :return:
         """
         #if self.collide_point(mouse_motion_event.x, mouse_motion_event.y) and self._draggable:
         global DEBUG_TOUCH_UP
-        debug.print ("***                 DragNDropWidget", level=DEBUG_TOUCH_UP)
-        debug.print ("***  on_touch_up: self:", self, "copy:", self.copy, "parent:", self.parent, level=DEBUG_TOUCH_UP)
-        debug.print ("***  id:", hex(id(self)), level=DEBUG_TOUCH_UP)
-        debug.print ("***  am_touched:", self.am_touched, "is_double_tap:", self.is_double_tap, level=DEBUG_TOUCH_UP)
-        debug.print ("***  was dragged?", self._dragged, "event:", mouse_motion_event.__repr__(), level=DEBUG_TOUCH_UP)
-        debug.print ("***                 on_touch_up                ***", level=DEBUG_TOUCH_UP)
-        debug.print ("***  Mouse Motion Event:", mouse_motion_event, level=DEBUG_TOUCH_UP)
+        # debug.print ("***                 DragNDropWidget", level=DEBUG_TOUCH_UP)
+        # debug.print ("***  on_touch_up: self:", self, "copy:", self.copy, "parent:", self.parent, level=DEBUG_TOUCH_UP)
+        # debug.print ("***  id:", hex(id(self)), level=DEBUG_TOUCH_UP)
+        # debug.print ("***  am_touched:", self.am_touched, "is_double_tap:", self.is_double_tap, level=DEBUG_TOUCH_UP)
+        # debug.print ("***  was dragged?", self._dragged, "event:", mouse_motion_event.__repr__(), level=DEBUG_TOUCH_UP)
+        # debug.print ("***                 on_touch_up                ***", level=DEBUG_TOUCH_UP)
+        # debug.print ("***  Mouse Motion Event:", mouse_motion_event, level=DEBUG_TOUCH_UP)
         # We if a widget is reborn, this event may be called a second time. Don't do that.
         if self.touch_up_event_start == mouse_motion_event.time_start:
             return
         self.touch_up_event_start = mouse_motion_event.time_start
-
-        if self.is_double_tap and not self._dragged:
-            debug.print ("on_touch_up: DOUBLE TAP AND NOT DRAGGED", level=DEBUG_TOUCH_UP)
-            self.set_drag_finish_state()
+        if not self.am_touched:
+            # Only respond to long touches.
+            debug.print(self, "NOT touched", level=DEBUG_TOUCH_UP)
             return
+        else:
+            debug.print(self, "am touched", definitely=True)
+        debug.print(self, "am_touched = False !!!!!!!!!!!!!!!", definitely=True)
         self.am_touched = False
+        # Without this, double tap will never allow the widget to drag...
+        # Because self.am_touched will be set to false on the line following and
+        # on_touch_move will then do nothing
+        # TODO: Figure out why I'm setting drag_finish_state here.
+        if self.is_double_tap and not self._dragged:
+             debug.print ("on_touch_up: DOUBLE TAP AND NOT DRAGGED", definitely=True)
+             # self.set_drag_finish_state() # _drag_started, is_double_tap, _dragged, copy all False
+             return
+        #
         if self._draggable and self._dragged:
             debug.print ("on_touch_up: DRAGGED!!!!!!!", level=DEBUG_TOUCH_UP)
             self.touch_x = mouse_motion_event.x
@@ -264,7 +297,10 @@ class DragNDropWidget(Widget):
             # TODO: Is this right? How do I send on_touch_up after
             # TODO: a double tap?
         else:
-            debug.print ("on_touch_up: NOT DRAGGED", level=DEBUG_TOUCH_UP)
+            debug.print ("on_touch_up: NOT DRAGGED", definitely=True)
+            # TODO: If the widget is not moved enough, nothing happens. It does not
+            # TODO: get replaced; instead, it hangs out in the root window (I think)
+            # TODO: and is like an orphan.
             self.set_drag_finish_state()
     # TODO: LOOK ALL OVER FOR DISPATCH, AND SEND COORDS
 
@@ -282,7 +318,8 @@ class DragNDropWidget(Widget):
         if the_widget.am_touched:
             if not the_widget._drag_started:
                 the_widget.dispatch("on_drag_start", mouse_motion_event)
-                the_widget.am_touched = False
+                # debug.print(the_widget, "am_touched = False !!!!!!!!!!!!!!!", definitely=True)
+                # the_widget.am_touched = False
         if not the_widget._drag_started:
             return
         the_widget._move_counter += 1
@@ -454,6 +491,7 @@ n                  (This means it left that widget without dispatching on_motion
         if self._drag_started:
             return
         debug.print("STARTING DRAG. Remove?", self.remove_on_drag, level=DEBUG_DRAG_START)
+        debug.print("is_double_tap:", self.is_double_tap, level=DEBUG_DRAG_START)
         debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func), level=DEBUG_DRAG_START)
         debug.print("Event:", mouse_motion_event, level=DEBUG_DRAG_START)
         if self.remove_on_drag:
@@ -466,7 +504,7 @@ n                  (This means it left that widget without dispatching on_motion
             self.root_parent(self)
         else:
             #create copy of object to drag
-            debug.print("Create copy, deep copy of: ", self.text, self, level=DEBUG_DRAG_START)
+            debug.print("Create copy, kivydnd copy of: ", self.text, self, level=DEBUG_DRAG_START)
             # copy_of_self = copy.deepcopy(self)
             copy_of_self = self.kivydnd_copy()
             # We'll handle those variables that are common to ALL d-n-d
@@ -475,7 +513,7 @@ n                  (This means it left that widget without dispatching on_motion
             self.deepen_the_copy(copy_of_self)
             copy_of_self._dragged = True
             if copy_of_self.drag_start_func is not None:
-                copy_of_self.drag_start_func(copy_of_self, copy_of_self.drag_start_args)
+                copy_of_self.drag_start_func(copy_of_self.drag_start_args, copy=copy_of_self)
             copy_of_self.set_drag_start_state()
             copy_of_self.root_window = self.parent.get_root_window()
             ## the final child class MUST implement __deepcopy__
@@ -485,6 +523,7 @@ n                  (This means it left that widget without dispatching on_motion
             # self._old_parent.add_widget(copy_of_self, index=self._old_index)
             copy_of_self.root_parent(copy_of_self)
             copy_of_self.pos = self.pos
+            debug.print("kivydnd copy: ", copy_of_self.text, copy_of_self, level=DEBUG_DRAG_START)
 
     def absolute_collide_point(self, event_x, event_y):
         global DEBUG_COLLIDE_POINT
@@ -498,10 +537,10 @@ n                  (This means it left that widget without dispatching on_motion
         global DEBUG_DRAG_FINISH
         # Don't worry, opacity will be properly set in set_drag_finish_state()
         # after the animation
-        debug.print ("on_drag_finish: ================================================================", level=DEBUG_DRAG_FINISH)
-        debug.print ("on_drag_finish, beginning, parent:", self.parent, "copy?", self.copy, level=DEBUG_DRAG_FINISH)
+        debug.print ("================================================================", level=DEBUG_DRAG_FINISH)
+        debug.print ("beginning, parent:", self.parent, "copy?", self.copy, level=DEBUG_DRAG_FINISH)
         debug.print ("self:", self, "is_double_tap?", self.is_double_tap, level=DEBUG_DRAG_FINISH)
-        debug.print ("on_drag_finish: ================================================================", level=DEBUG_DRAG_FINISH)
+        debug.print ("================================================================", level=DEBUG_DRAG_FINISH)
         self.opacity = 1.0
         drag_destination_list = []
         self.found_drop_recipients_ok_dict = {}
@@ -526,7 +565,7 @@ n                  (This means it left that widget without dispatching on_motion
             for obj in self.droppable_zone_objects:
                 if not obj in drag_destination_list:
                     drag_destination_list.append(obj)
-            #for obj in drag_destination_list:
+            # for obj in drag_destination_list:
             #    debug.print ("Possible drop destination:", obj.text)
             # --- end of assemble list
 
@@ -582,7 +621,6 @@ n                  (This means it left that widget without dispatching on_motion
 
             if not got_one_drop_not_parent:
                 drop_ok_do_animation = False
-
             # -------------------------------------------------------------------------
             # Perform after-drop functions
             if got_one_successful_drop:
