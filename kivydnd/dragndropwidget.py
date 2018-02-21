@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 #    Copyright 2016, 2015, 2014, 2013, 2012 Pavel Kostelnik
-#    Copyright 2017 Michael Schwager
+#    Copyright 2017, 2018 Michael Schwager
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ from kivy.properties import (
 	ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
 from kivy.uix.widget import Widget
 
-from debug_print import Debug
+from .debug_print import Debug
 
 debug = Debug() # Is False by default.
 DEBUG_TOUCH_UP=0x04
