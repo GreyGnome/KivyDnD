@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-#    Copyright 2017 Michael Schwager
+#    Copyright 2017, 2018 Michael Schwager
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class Debug():
     Instantiate this bad boy in your file, and you can turn it on and off as you
     wish in your file. Then you can print debug messages, like so:
 
-    from debug_print import Debug
+    from kivydnd.debug_print import Debug
     debug = Debug(True)
 
     debug.print ("Here's a message")
