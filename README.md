@@ -3,13 +3,13 @@ NOTE: Version 0.5 will bring a philosophical and technical change to the deepcop
 widgets during a copy-and-drag operation. See the below, and the Release Notes,
 for more information. The code now stored on Github includes these changes.
 
-KivyDnD is a Python library for the Kivy framework that enables drag-n-drop of widgets. Source code is here:
+KivyDnD is a Python library for the Kivy framework that enables drag-n-drop of widgets
+within your Kivy app (within an app only, not with any other applications running on your device). Source code is here:
 https://github.com/GreyGnome/KivyDnD .
 
 This work is an update of Pavel Kostelnik's master thesis code found on:
 http://kostasprogramming.blogspot.com/2012/10/kivy-framework-drag-n-drop-widget.html
-He did a great job and created a solid foundation. I needed a drag-and-drop
-framework and decided to build on his work. While doing this, I found Pavel and he
+He did a great job and created a solid foundation. Pavel
 agreed to release the library under the Apache 2.0 license.
 
 Additional coding by Edvardas Dlugauskas: Significant restructuring of the project,
@@ -22,15 +22,16 @@ around in the main window, then dropped onto other chosen widgets. Then,
 defined functions can be run in response.
 ## DropDestination
 Using DropDestination is optional. It adds two features to the library: drop groups, and 
-the ability to fire events when the pointer enters and leaves the boundaries of these
-Widgets. Drop groups allow control over which widget(s) can receive a drop from particular
-DragNDropWdidget(s). Though the DragNDropWidget can define who
+the ability to fire events when the pointer enters and leaves the boundaries of DropDestination
+Widgets.
+
+Drop groups allow control over which widget(s) can receive a drop from particular
+DragNDropWidget(s). Though the DragNDropWidget can define who
 its recipients will be (see `droppable_zone_objects` in the example below),
 a draggable widget in a drop group can only be dropped into widgets
 in its same drop group. You can have multiple drop groups, any DragNDropWidget can be a
 member of multiple drop groups, and any DropDestination can be a member of multiple drop
-groups. Another feature is that a DropDestination can fire an event when the pointer enters
-its boundaries, and when it leaves. See the code and examples for more information. 
+groups. 
 
 # Usage
 ## Installation
