@@ -57,7 +57,8 @@ class DropDestination(Widget):
     motion_outside_widget_args = ListProperty([])
     motion_inside_widget_func = ObjectProperty(None)
     motion_inside_widget_args = ListProperty([])
-    drop_group = StringProperty(None)
+    while_dragging_func = StringProperty(None)
+    drop_group = StringProperty("_palm_default")
     widget_entered = None
 
     def __init__(self, **kw):
@@ -74,8 +75,6 @@ class DropDestination(Widget):
         self.motion_is_bound_to_window = False
         self.bind(drop_group=self.bind_drop_group)
         self.in_me = False
-        if self.drop_group is None:
-            self.drop_group = "_palm_default"
 
     def close(self):
         """

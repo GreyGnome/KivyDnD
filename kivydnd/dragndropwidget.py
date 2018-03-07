@@ -28,14 +28,14 @@ from kivy.properties import (
 	ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
 from kivy.uix.widget import Widget
 
-from .debug_print import Debug
+from kivydnd.debug_print import Debug
 
 debug = Debug() # Is False by default.
-DEBUG_TOUCH_UP=0x04
+DEBUG_TOUCH_UP=0x00
 DEBUG_TOUCH_MOVE=0x00
-DEBUG_DRAG_START=0x01
+DEBUG_DRAG_START=0x00
 DEBUG_COLLIDE_POINT=0x00
-DEBUG_DRAG_FINISH=0x02
+DEBUG_DRAG_FINISH=0x00
 DEBUG_UNROOT_ME=0x00
 DEBUG_REBORN=0x00
 DEBUG_SUCCESSFUL_DROP=0x00
@@ -75,7 +75,7 @@ class DragNDropWidget(Widget):
     drag_start_func = ObjectProperty(None)
     drag_start_args = ListProperty([])
     can_drop_into_parent = BooleanProperty(False)
-    drop_group = StringProperty(None)
+    drop_group = StringProperty("_palm_default")
     # This is not a Property
     widget_entered = None
 
@@ -90,7 +90,6 @@ class DragNDropWidget(Widget):
         self.register_event_type("on_motion_outside")
         self.register_event_type("on_close")
         self._old_opacity = self.opacity
-        self._drag_started = False
         self._dragged = False
         self._draggable = True
         self.copy = False
@@ -105,8 +104,6 @@ class DragNDropWidget(Widget):
         self.bind(motion_flee_widget_func=self.bind_mouse_motion)
         self.bind(motion_outside_widget_func=self.bind_mouse_motion)
         self.bind(drop_group=self.bind_drop_group)
-        if self.drop_group is None:
-            self.drop_group = "_palm_default"
         self.found_drop_recipients_ok_dict = {}
         self.min_x = -1
         self.min_y = -1
@@ -171,21 +168,19 @@ class DragNDropWidget(Widget):
         self._old_parent = self.parent
         self._old_parent_children_reversed_list = self.parent.children[:]
         self._old_parent_children_reversed_list.reverse()
+        self._dragged = True
         DragNDropWidget.widget_entered = None
         if self.copy:
             self._old_index = -1
         else:
             self._old_index = self.parent.children.index(self)
-        debug.print("SET _drag_started", self, "=============================================",
-                    definitely=True)
-        self._drag_started = True
 
     def set_drag_finish_state(self, set_opacity=True):
         global DEBUG_DRAG_FINISH
-        self._drag_started = False
         self.is_double_tap = False
         self._dragged = False
         self.copy = False
+        self.move_counter = 0
         # TODO: If I was the copy, I need to not be a copy :-). Set it to false...
         # TODO: (after current debugging on 6/17/17)
         if set_opacity:
@@ -232,19 +227,14 @@ class DragNDropWidget(Widget):
         :return:
         """
         # TODO: make the drag delay configurable
-        debug.print(self, "tap", definitely=True)
         if self.collide_point(touch.x, touch.y) and self._draggable:
             # detect if the touch is "long"... (if not, dispatch drag)
             if (abs(touch.time_end - touch.time_start) > 0.2) or touch.is_double_tap:
                 self.touch_offset_x = touch.x - self.x
                 self.touch_offset_y = touch.y - self.y
                 self.am_touched = True
-                debug.print(self, "was touched", definitely=True)
                 if touch.is_double_tap:
                     self.is_double_tap = True
-                    debug.print ("DOUBLE TAPPED THIS ONE!", self, self.is_double_tap, definitely=True)
-            else:
-                debug.print(self, "was tapped, but not logged as touched", definitely=True)
 
     def on_touch_up(self, mouse_motion_event):
         """
@@ -276,15 +266,14 @@ class DragNDropWidget(Widget):
             debug.print(self, "NOT touched", level=DEBUG_TOUCH_UP)
             return
         else:
-            debug.print(self, "am touched", definitely=True)
-        debug.print(self, "am_touched = False !!!!!!!!!!!!!!!", definitely=True)
+            debug.print(self, "am touched", level=DEBUG_TOUCH_UP)
+        # debug.print(self, "am_touched = True !!!!!!!!!!!!!!!", definitely=True)
         self.am_touched = False
         # Without this, double tap will never allow the widget to drag...
         # Because self.am_touched will be set to false on the line following and
         # on_touch_move will then do nothing
         # TODO: Figure out why I'm setting drag_finish_state here.
         if self.is_double_tap and not self._dragged:
-             debug.print ("on_touch_up: DOUBLE TAP AND NOT DRAGGED", definitely=True)
              # self.set_drag_finish_state() # _drag_started, is_double_tap, _dragged, copy all False
              return
         #
@@ -316,16 +305,15 @@ class DragNDropWidget(Widget):
         """
         global DEBUG_TOUCH_MOVE
         if the_widget.am_touched:
-            if not the_widget._drag_started:
+            if not the_widget._dragged:
                 the_widget.dispatch("on_drag_start", mouse_motion_event)
                 # debug.print(the_widget, "am_touched = False !!!!!!!!!!!!!!!", definitely=True)
                 # the_widget.am_touched = False
-        if not the_widget._drag_started:
+        if not the_widget._dragged:
             return
         the_widget._move_counter += 1
-        if the_widget._draggable and the_widget._drag_started:
+        if the_widget._draggable and the_widget._dragged:
             # if the_widget._dragged and the_widget._draggable:
-            the_widget._dragged = True
             x = mouse_motion_event.x - the_widget.touch_offset_x
             y = mouse_motion_event.y - the_widget.touch_offset_y
             # TODO: Correct this debug_flag temporary print.
@@ -399,7 +387,8 @@ n                  (This means it left that widget without dispatching on_motion
         :param motion_xy_typle: the coordinates of the mouse in the Window's coord system 
         :return:
         """
-        if self._drag_started:
+        print ("on_motion")
+        if self._dragged:
             return
         if self.collide_point(*self.to_widget(motion_xy_tuple[0], motion_xy_tuple[1])):
             if DragNDropWidget.widget_entered is not self:
@@ -474,8 +463,9 @@ n                  (This means it left that widget without dispatching on_motion
         copy_of_self.touch_offset_x = self.touch_offset_x
         copy_of_self.touch_offset_y = self.touch_offset_y
         copy_of_self.drop_recipients = self.drop_recipients
+        copy_of_self.drop_group = self.drop_group
         copy_of_self.am_touched = self.am_touched
-        copy_of_self._drag_started = self._drag_started
+        copy_of_self._dragged = self._dragged
         copy_of_self.is_double_tap = self.is_double_tap
 
     def on_drag_start(self, mouse_motion_event):
@@ -488,18 +478,17 @@ n                  (This means it left that widget without dispatching on_motion
         :return:
         """
         global DEBUG_DRAG_START
-        if self._drag_started:
+        if self._dragged:
             return
         debug.print("STARTING DRAG. Remove?", self.remove_on_drag, level=DEBUG_DRAG_START)
         debug.print("is_double_tap:", self.is_double_tap, level=DEBUG_DRAG_START)
         debug.print("What about class", self, "drag_start_func?:", str(self.drag_start_func), level=DEBUG_DRAG_START)
         debug.print("Event:", mouse_motion_event, level=DEBUG_DRAG_START)
         if self.remove_on_drag:
-            self._dragged = True
+            self.set_drag_start_state()
             debug.print("remove_on_drag, What about class", self, "drag_start_func?:", str(self.drag_start_func), level=DEBUG_DRAG_START)
             if self.drag_start_func is not None:
                 self.drag_start_func(self.drag_start_args)
-            self.set_drag_start_state()
             self.root_window = self.parent.get_root_window()
             self.root_parent(self)
         else:
@@ -511,10 +500,10 @@ n                  (This means it left that widget without dispatching on_motion
             # widgets. The widgets' classes can handle specifics
             # (such as text, etc.)
             self.deepen_the_copy(copy_of_self)
-            copy_of_self._dragged = True
+            self.am_touched = False
+            copy_of_self.set_drag_start_state()
             if copy_of_self.drag_start_func is not None:
                 copy_of_self.drag_start_func(copy_of_self.drag_start_args, copy=copy_of_self)
-            copy_of_self.set_drag_start_state()
             copy_of_self.root_window = self.parent.get_root_window()
             ## the final child class MUST implement __deepcopy__
             ## IF self.remove_on_drag == False !!! In this case this is
