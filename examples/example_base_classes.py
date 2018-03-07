@@ -31,13 +31,15 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 
 from kivydnd.dragndropwidget import DragNDropWidget
+from kivydnd.dropdestination import DropDestination
+
 
 debug = Debug(False)
 DEBUG_ON_TOUCH_UP=0x00
 DEBUG_POST_DROP_FUNC=0x00
 DEBUG_ON_SUCCESSFUL_DROP=0x00
 DEBUG_ON_UNSUCCESSFUL_DROP=0x00
-DEBUG_OOPS=0x04
+DEBUG_OOPS=0x00
 
 debug.register = DEBUG_ON_TOUCH_UP | DEBUG_POST_DROP_FUNC | DEBUG_ON_SUCCESSFUL_DROP |\
                  DEBUG_ON_UNSUCCESSFUL_DROP | DEBUG_OOPS
@@ -122,6 +124,11 @@ class DragDestinationLabel(Label):
         self.text = args[0].text + " dropped here! " + str(self.i) + " times"
 
 
+class DragDestinationDropLabel(DragDestinationLabel, DropDestination):
+    def __init__(self, *args, **kwargs):
+        super(DragDestinationDropLabel, self).__init__(**kwargs)
+
+
 class DragDestinationRelativeLayout(RelativeLayout):
     def __init__(self, *args, **kwargs):
         super(DragDestinationRelativeLayout, self).__init__(**kwargs)
@@ -134,7 +141,7 @@ class DragDestinationBoxLayout(BoxLayout):
         pass
 
 
-class DragSourceBoxLayout(BoxLayout):
+class DragSourceBoxLayout(BoxLayout, DropDestination):
     def __init__(self, *args, **kwargs):
         super(DragSourceBoxLayout, self).__init__(**kwargs)
         self.last_touch_up_time=0
