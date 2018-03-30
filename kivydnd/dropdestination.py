@@ -29,6 +29,7 @@ from kivy.properties import (
 from kivy.uix.widget import Widget
 
 from .debug_print import Debug
+from kivydnd.dnd_storage_singletons import draggables_dict, drag_destinations_dict
 
 debug = Debug() # Is False by default.
 DEBUG_COLLIDE_POINT=0x00
@@ -44,9 +45,8 @@ debug.register = DEBUG_COLLIDE_POINT | DEBUG_BIND_DROP_GROUP |\
                  DEBUG_BIND_MOUSE_MOTION | DEBUG_ON_MOTION | DEBUG_ON_MOTION_FLEE |\
                  DEBUG_ON_MOTION_OVER | DEBUG_ON_MOTION_OUTSIDE | DEBUG_ON_MOTION_INSIDE
 
-import dnd_storage_singletons
-draggables_dict=dnd_storage_singletons.draggables_dict
-drag_destinations_dict=dnd_storage_singletons.drag_destinations_dict
+# draggables_dict=dnd_storage_singletons.draggables_dict
+# drag_destinations_dict=dnd_storage_singletons.drag_destinations_dict
 
 class DropDestination(Widget):
     motion_over_widget_func = ObjectProperty(None)
@@ -105,7 +105,7 @@ class DropDestination(Widget):
 
     def bind_drop_group(self, arg1, arg2):
         global DEBUG_BIND_DROP_GROUP
-        # debug.print ("BINDING DROP GROUP", level=DEBUG_BIND_DROP_GROUP)
+        debug.print ("BINDING DROP GROUP", self.drop_group, level=DEBUG_BIND_DROP_GROUP)
         if self.drop_group not in drag_destinations_dict:
             drag_destinations_dict[self.drop_group]={}
         drag_destinations_dict[self.drop_group][self]=True
