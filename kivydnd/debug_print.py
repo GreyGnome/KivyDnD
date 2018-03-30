@@ -51,6 +51,14 @@ def debug_print(*args, **kwargs):
     print (basename + ":" + str(this_entry[1]), method, *args, **kwargs)
 
 
+def debug_widget_title(widget):
+    try:
+        title = widget.title
+    except AttributeError:
+        title = "No title"
+    return title
+
+
 class Debug():
     """
     Instantiate this bad boy in your file, and you can turn it on and off as you
