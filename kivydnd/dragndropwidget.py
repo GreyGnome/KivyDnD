@@ -20,36 +20,37 @@
 # Version 0.4
 from __future__ import print_function
 
-import copy
+# import copy
 
 from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.properties import (
-	ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
+    ListProperty, NumericProperty, BooleanProperty, ObjectProperty, StringProperty)
 from kivy.uix.widget import Widget
-from kivydnd import dnd_storage_singletons
+# from kivydnd import dnd_storage_singletons
 
-from kivydnd.debug_print import Debug
+from kivydnd.dnd_storage_singletons import draggables_dict, drag_destinations_dict
+from kivydnd.debug_print import Debug, debug_widget_title
 
-debug = Debug() # Is False by default.
-DEBUG_TOUCH_UP=0x00
-DEBUG_TOUCH_MOVE=0x00
-DEBUG_DRAG_START=0x00
-DEBUG_COLLIDE_POINT=0x00
-DEBUG_DRAG_FINISH=0x00
-DEBUG_UNROOT_ME=0x00
-DEBUG_REBORN=0x00
-DEBUG_SUCCESSFUL_DROP=0x00
-DEBUG_POST_SUCCESSFUL_ANIM=0x00
+debug = Debug()  # Is False by default.
+DEBUG_TOUCH_UP = 0x00
+DEBUG_TOUCH_MOVE = 0x00
+DEBUG_DRAG_START = 0x00
+DEBUG_COLLIDE_POINT = 0x00
+DEBUG_DRAG_FINISH = 0x00
+DEBUG_UNROOT_ME = 0x00
+DEBUG_REBORN = 0x00
+DEBUG_SUCCESSFUL_DROP = 0x00
+DEBUG_POST_SUCCESSFUL_ANIM = 0x00
 
-debug.register=DEBUG_TOUCH_UP | DEBUG_TOUCH_MOVE | DEBUG_DRAG_START | DEBUG_COLLIDE_POINT |\
-               DEBUG_DRAG_FINISH | DEBUG_UNROOT_ME | DEBUG_REBORN | DEBUG_SUCCESSFUL_DROP |\
-               DEBUG_POST_SUCCESSFUL_ANIM
+debug.register = DEBUG_TOUCH_UP | DEBUG_TOUCH_MOVE | DEBUG_DRAG_START | DEBUG_COLLIDE_POINT |\
+                 DEBUG_DRAG_FINISH | DEBUG_UNROOT_ME | DEBUG_REBORN | DEBUG_SUCCESSFUL_DROP |\
+                 DEBUG_POST_SUCCESSFUL_ANIM
 
-import kivydnd.dnd_storage_singletons
 
-draggables_dict=dnd_storage_singletons.draggables_dict
-drag_destinations_dict=dnd_storage_singletons.drag_destinations_dict
+# draggables_dict = dnd_storage_singletons.draggables_dict
+# drag_destinations_dict = dnd_storage_singletons.drag_destinations_dict
+
 
 class DragNDropWidget(Widget):
     # let kivy take care of kwargs and get signals for free by using
@@ -112,6 +113,7 @@ class DragNDropWidget(Widget):
         self.max_y = -1
         self.move_counter = 0
         self.touch_up_event_start = 0
+        self._up_event_count = 0
 
     def close(self):
         """
@@ -182,6 +184,8 @@ class DragNDropWidget(Widget):
         self._dragged = False
         self.copy = False
         self.move_counter = 0
+        self._up_event_count = 0
+        self.am_touched = False
         # TODO: If I was the copy, I need to not be a copy :-). Set it to false...
         # TODO: (after current debugging on 6/17/17)
         if set_opacity:
@@ -228,6 +232,8 @@ class DragNDropWidget(Widget):
         :return:
         """
         # TODO: make the drag delay configurable
+        # if self.text == "Me in relief.JPG":
+        #    debug.print ("touch down Me in relief", definitely=True)
         if self.collide_point(touch.x, touch.y) and self._draggable:
             # detect if the touch is "long"... (if not, dispatch drag)
             if (abs(touch.time_end - touch.time_start) > 0.2) or touch.is_double_tap:
@@ -252,13 +258,15 @@ class DragNDropWidget(Widget):
         #if self.collide_point(mouse_motion_event.x, mouse_motion_event.y) and self._draggable:
         global DEBUG_TOUCH_UP
         # debug.print ("***                 DragNDropWidget", level=DEBUG_TOUCH_UP)
-        # debug.print ("***  on_touch_up: self:", self, "copy:", self.copy, "parent:", self.parent, level=DEBUG_TOUCH_UP)
+        # debug.print ("***  self:", self, "copy:", self.copy, "parent:", self.parent, level=DEBUG_TOUCH_UP)
         # debug.print ("***  id:", hex(id(self)), level=DEBUG_TOUCH_UP)
         # debug.print ("***  am_touched:", self.am_touched, "is_double_tap:", self.is_double_tap, level=DEBUG_TOUCH_UP)
         # debug.print ("***  was dragged?", self._dragged, "event:", mouse_motion_event.__repr__(), level=DEBUG_TOUCH_UP)
         # debug.print ("***                 on_touch_up                ***", level=DEBUG_TOUCH_UP)
         # debug.print ("***  Mouse Motion Event:", mouse_motion_event, level=DEBUG_TOUCH_UP)
-        # We if a widget is reborn, this event may be called a second time. Don't do that.
+        # if self.text == "Me in relief.JPG":
+        #     debug.print ("I hit Me in relief, double:", self.is_double_tap, definitely=True)
+        # If a widget is reborn, this event may be called a second time. Don't do that.
         if self.touch_up_event_start == mouse_motion_event.time_start:
             return
         self.touch_up_event_start = mouse_motion_event.time_start
@@ -268,15 +276,16 @@ class DragNDropWidget(Widget):
             return
         else:
             debug.print(self, "am touched", level=DEBUG_TOUCH_UP)
-        # debug.print(self, "am_touched = True !!!!!!!!!!!!!!!", definitely=True)
-        self.am_touched = False
+        debug.print ("Am_touched:", self.am_touched, "double tap:", self.is_double_tap, level=DEBUG_TOUCH_UP)
+        self._up_event_count += 1
         # Without this, double tap will never allow the widget to drag...
         # Because self.am_touched will be set to false on the line following and
         # on_touch_move will then do nothing
         # TODO: Figure out why I'm setting drag_finish_state here.
-        if self.is_double_tap and not self._dragged:
-             # self.set_drag_finish_state() # _drag_started, is_double_tap, _dragged, copy all False
-             return
+        # TODO: This seems odd, but I needed it at one point.
+        # if self.is_double_tap and not self._dragged:
+        #     self.set_drag_finish_state() # _drag_started, is_double_tap, _dragged, copy all False
+        #     return
         #
         if self._draggable and self._dragged:
             debug.print ("on_touch_up: DRAGGED!!!!!!!", level=DEBUG_TOUCH_UP)
@@ -284,14 +293,25 @@ class DragNDropWidget(Widget):
             self.touch_y = mouse_motion_event.y
             debug.print ('dispatch "on_drag_finish", mouse_motion_event) *******************************', level=DEBUG_TOUCH_UP)
             self.dispatch("on_drag_finish", mouse_motion_event)
+            self.set_drag_finish_state()
             # TODO: Is this right? How do I send on_touch_up after
             # TODO: a double tap?
         else:
-            debug.print ("on_touch_up: NOT DRAGGED", definitely=True)
+            debug.print ("_draggable:", self._draggable, "_dragged:",
+                         self._dragged, "is_double_tap:", self.is_double_tap, "up event count:",
+                         self._up_event_count, level=DEBUG_TOUCH_UP)
             # TODO: If the widget is not moved enough, nothing happens. It does not
             # TODO: get replaced; instead, it hangs out in the root window (I think)
             # TODO: and is like an orphan.
+        if ( self.is_double_tap == True and self._up_event_count == 2 ) or self.is_double_tap == False:
+            debug.print ("Reset _up_event_count.", level=DEBUG_TOUCH_UP)
+            debug.print ("is_double_tap", self.is_double_tap, "_up_event_count", self._up_event_count,
+                         level=DEBUG_TOUCH_UP)
+            # self.am_touched = False
+            # self._up_event_count = 0
+            # self.is_double_tap = False
             self.set_drag_finish_state()
+
     # TODO: LOOK ALL OVER FOR DISPATCH, AND SEND COORDS
 
     # TODO: Need to set         Window.bind(mouse_pos=self.on_motion)
@@ -305,11 +325,14 @@ class DragNDropWidget(Widget):
         :return:
         """
         global DEBUG_TOUCH_MOVE
+        debug.print("MOVING", level=DEBUG_TOUCH_MOVE)
         if the_widget.am_touched:
             if not the_widget._dragged:
                 the_widget.dispatch("on_drag_start", mouse_motion_event)
                 # debug.print(the_widget, "am_touched = False !!!!!!!!!!!!!!!", definitely=True)
                 # the_widget.am_touched = False
+        else:
+            debug.print("Not touched:", the_widget.text, level=DEBUG_TOUCH_MOVE)
         if not the_widget._dragged:
             return
         the_widget._move_counter += 1
@@ -468,6 +491,7 @@ n                  (This means it left that widget without dispatching on_motion
         copy_of_self.am_touched = self.am_touched
         copy_of_self._dragged = self._dragged
         copy_of_self.is_double_tap = self.is_double_tap
+        copy_of_self._up_event_count = self._up_event_count
 
     def on_drag_start(self, mouse_motion_event):
         """
@@ -502,13 +526,14 @@ n                  (This means it left that widget without dispatching on_motion
             # (such as text, etc.)
             self.deepen_the_copy(copy_of_self)
             self.am_touched = False
+            self._up_event_count = 0
             copy_of_self.set_drag_start_state()
             if copy_of_self.drag_start_func is not None:
                 copy_of_self.drag_start_func(copy_of_self.drag_start_args, copy=copy_of_self)
             copy_of_self.root_window = self.parent.get_root_window()
-            ## the final child class MUST implement __deepcopy__
-            ## IF self.remove_on_drag == False !!! In this case this is
-            ## met in draggableArhellModelImage class
+            # the final child class MUST implement __deepcopy__
+            # IF self.remove_on_drag == False !!! In this case this is
+            # met in draggableArhellModelImage class
             # TODO: MIKE: it used to be that copy_of_self was added to _old_parent
             # self._old_parent.add_widget(copy_of_self, index=self._old_index)
             copy_of_self.root_parent(copy_of_self)
@@ -530,28 +555,36 @@ n                  (This means it left that widget without dispatching on_motion
         debug.print ("================================================================", level=DEBUG_DRAG_FINISH)
         debug.print ("beginning, parent:", self.parent, "copy?", self.copy, level=DEBUG_DRAG_FINISH)
         debug.print ("self:", self, "is_double_tap?", self.is_double_tap, level=DEBUG_DRAG_FINISH)
+        debug.print ("Dragged?", self._dragged, "Draggable?", self._draggable, level=DEBUG_DRAG_FINISH)
         debug.print ("================================================================", level=DEBUG_DRAG_FINISH)
         self.opacity = 1.0
         drag_destination_list = []
         self.found_drop_recipients_ok_dict = {}
         # del self.drop_recipients[:]
         if self._dragged and self._draggable:
+            (touch_window_x, touch_window_y) = self.to_window(self.touch_x, self.touch_y)
             # -------------------------------------------------------------------------
             # --- assemble list of possible drag destinations
             # These destinations are based on either drop groups, or simply because
             # they've been added to droppable_zone_objects
             # debug.print "on_drag_finish: DRAGGABLES_DICT:", draggables_dict
+            debug.print("draggables_dict:", draggables_dict, level=DEBUG_DRAG_FINISH)
             for drop_group in draggables_dict:
                 if draggables_dict[drop_group].get(self):
                     if drop_group in drag_destinations_dict:
                         for drop_recipient in drag_destinations_dict[drop_group]:
                             if not drop_recipient in drag_destination_list:
                                 drag_destination_list.append(drop_recipient)
+            debug.print("drag_destinations_dict:", drag_destinations_dict, level=DEBUG_DRAG_FINISH)
+            for drop_group in drag_destinations_dict:
+                for obj in drag_destinations_dict[drop_group]:
+                    debug.print("Contents: Title", debug_widget_title(obj), "object", obj, level=DEBUG_DRAG_FINISH)
             for drop_group in drag_destinations_dict:
                 if draggables_dict[drop_group].get(self):
                     for drop_recipient in drag_destinations_dict[drop_group]:
                         if not drop_recipient in drag_destination_list:
                             drag_destination_list.append(drop_recipient)
+            debug.print("droppable_zone_objects:", self.droppable_zone_objects, level=DEBUG_DRAG_FINISH)
             for obj in self.droppable_zone_objects:
                 if not obj in drag_destination_list:
                     drag_destination_list.append(obj)
@@ -561,11 +594,19 @@ n                  (This means it left that widget without dispatching on_motion
 
             # -------------------------------------------------------------------------
             # --- check which object(s) did receive this drop.
+            debug.print("drag_destination_list:", drag_destination_list, level=DEBUG_DRAG_FINISH)
             for obj in drag_destination_list:
-                (touch_window_x, touch_window_y) = self.to_window(self.touch_x, self.touch_y)
-                debug.print("Touch position:", self.touch_x, self.touch_y, "Window position:",
-                            touch_window_x, touch_window_y, level=DEBUG_DRAG_FINISH)
-                debug.print ("Check if drop ok: touch:", touch_window_x, touch_window_y, "Object's pos in Window:", obj.to_window(obj.x, obj.y), obj.width, obj.height, end=" ", level=DEBUG_DRAG_FINISH)
+
+                debug.print("Title:", debug_widget_title(self), level=DEBUG_DRAG_FINISH)
+                debug.print("Touch position:", self.touch_x, self.touch_y,
+                            "in-Window position:", touch_window_x, touch_window_y,
+                            level=DEBUG_DRAG_FINISH)
+                debug.print ("Check if drop ok: touch:", touch_window_x, touch_window_y,
+                             "Drag Destination Object:", obj, end=" ",
+                             level=DEBUG_DRAG_FINISH)
+                debug.print ("Position in Window:",
+                             obj.to_window(obj.x, obj.y), "WxH:", obj.width, obj.height, end=" ",
+                             level=DEBUG_DRAG_FINISH)
                 # TODO: IF object does not subclass DropDestination, it won't have this
                 # TODO: method defined!
                 if self.widget_absolute_collide_point(obj, touch_window_x, touch_window_y):
