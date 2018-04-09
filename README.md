@@ -35,9 +35,10 @@ groups.
 
 # Usage
 ## Installation
-Extract the package, and cd into the dragndropwidget directory. Then run:
+Go to https://github.com/GreyGnome/KivyDnD/tree/master/dist. Grab the latest
+.tar.gz file (e.g., "kivydnd-0.5.0.tar.gz"). Then run:
 
-`sudo python setup.py install`
+`sudo pip setup.py install`
 
 ## Importing and Using
 
