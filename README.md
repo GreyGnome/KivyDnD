@@ -38,7 +38,17 @@ groups.
 Go to https://github.com/GreyGnome/KivyDnD/tree/master/dist. Grab the latest
 .tar.gz file (e.g., "kivydnd-0.5.0.tar.gz"). Then run:
 
-`sudo pip setup.py install`
+`sudo pip setup.py install kivydnd-0.5.0.tar.gz`
+You should find the examples in /usr/share
+
+If installing on Windows, you don't need to install as Administrator. If
+you simply
+`pip setup.py install kivydnd-0.5.0.tar.gz`
+then the files will get installed on your C: drive by default, under (for
+example) **C:\Users\\*loginname*\AppData\Local\Programs\Python\Python36\**
+You'll find the examples under Share\kivydnd-examples, and the library itself
+under Lib\site-packages\kivydnd
+
 
 ## Importing and Using
 
