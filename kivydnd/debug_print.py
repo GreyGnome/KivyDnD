@@ -126,6 +126,15 @@ class Debug():
         method = "%-15s" % method
         print(basename + ":" + str(this_entry[1]), method, args, kwargs)
 
+    def print_trace(self, *args, **kwargs):
+        definitely = kwargs.pop('definitely', False)
+        level = kwargs.pop('level', 0x00)
+        if not definitely:
+            if not (level & self.register):
+                if not self.debug_flag:
+                    return
+        traceback.print_stack()
+
     def print_widget_ancestry(self, widget, *args, **kwargs):
         definitely = kwargs.get('definitely',False)
         if not definitely:
