@@ -58,6 +58,7 @@ class DropDestination(Widget):
     motion_inside_widget_func = ObjectProperty(None)
     motion_inside_widget_args = ListProperty([])
     while_dragging_func = StringProperty(None)
+    is_drop_eligible = BooleanProperty(True)
     drop_group = StringProperty("_palm_default")
     widget_entered = None
 
