@@ -134,7 +134,7 @@ class DnDExampleCopyDraggable(App):
         messagebox.flash()
 
     def oops(self, arg1=None, arg2=None):
-        print("Self, arg1, arg2:", self, arg1, arg2)
+        # print("Self, arg1, arg2:", self, arg1, arg2)
         messagebox = Builder.load_string(kv1)
         messagebox.text = "Ooops! Can't drop there!"
 
