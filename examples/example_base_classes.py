@@ -87,9 +87,9 @@ class DraggableButton(Button, DragNDropWidget):
         super(DraggableButton, self).on_successful_drop()
         debug.print("Run overridden method", level=DEBUG_ON_SUCCESSFUL_DROP)
 
-    def on_unsuccessful_drop(self, arg1=None, arg2=None):
+    def on_unsuccessful_drop(self, animation=True, widget=None):
         global DEBUG_ON_UNSUCCESSFUL_DROP
-        super(DraggableButton, self).on_unsuccessful_drop(arg1, arg2)
+        super(DraggableButton, self).on_unsuccessful_drop(animation=animation, widget=None)
         # TODO: DEBUG THIS!
         debug.print("Run overridden method", level=DEBUG_ON_UNSUCCESSFUL_DROP)
 
