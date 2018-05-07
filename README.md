@@ -39,6 +39,7 @@ Go to https://github.com/GreyGnome/KivyDnD/tree/master/dist. Grab the latest
 .tar.gz file (e.g., "kivydnd-0.5.0.tar.gz"). Then run:
 
 `sudo pip setup.py install kivydnd-0.5.0.tar.gz`
+
 You should find the examples in /usr/share
 
 If installing on Windows, you don't need to install as Administrator. If
@@ -114,7 +115,9 @@ in increasing complexities. See them for more on how to use the library.
 | motion_outside_widget_args | ListProperty([]) | List of arguments given to motion_outside_widget_func (after `self`). |
 | drag_start_args | ListProperty([]) | List of arguments given to drag_start_func (after `self`). |
 | can_drop_into_parent | BooleanProperty(False) | Whether a drag-n-drop of the widget back onto its parent counts as a successful drop or not. If a widget's parent is a drop destination for this widget, a drag-n-drop will not be successful there unless this is set. |
-| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object. |
+| drop_group | StringProperty(None) | A StringProperty that you define, this is a name you assign to a group of widgets that can receive a drop from this widget. Can be used instead of, or in addition to, `droppable_zone_objects`. If used, Widgets in this drop group must subclass `DropDestination`. They must also be added to the 'drop_group' StringProperty in that object.
+| rebirth_failed_drop | BooleanProperty(True) | At the end of a failed drop, if True the widget is rebirthed into its original container. |
+| close_on_fail | BooleanProperty(False) | At the end of a failed drop, if True the widget is closed- that is, deleted and all its references removed so that the garbage collector may return its memory to the system. | |
 | **Methods** | arguments |  |
 | drop_func | self, drop_args | The user-defined method or function that will be run at the end of a successful drop. |
 | while_dragging_func | self, MouseMotionEvent | The user defined method or function that will be run as the widget is dragged. |
@@ -286,38 +289,33 @@ call the appropriate user-defined functions. It may then call the ending animati
 performs cleanup. The order of methods called from `on_drag_finish()` is as follows:
 
 * If there was at least one successful drop:
- * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop
- Animation. Then:
-  * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more
-  recipients.
-   * Call `self.drop_func()`, if defined.
-   * Call `found_drop_recipient.drop_func(self)` for each successful drop recipient, if defined.
-  * Call `post_successful_animation()` after the widget's animation is finished.
+  * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation. Then:
+    * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more recipients.
+    * Call `self.drop_func()`, if defined.
+    * Call `found_drop_recipient.drop_func(self)` for each successful drop recipient, if defined.
+    * Call `post_successful_animation()` after the widget's animation is finished.
  * If we set the Property to False, we do not want an animation:
-  * Call `on_successful_drop()` immediately.
-   * Calls `self.drop_func()` and `found_drop_recipient.drop_func(self)` as described above.
-  * Call `post_successful_animation()` (which is a misnomer in this case).
+   * Call `on_successful_drop()` immediately.
+     * Calls `self.drop_func()` and `found_drop_recipient.drop_func(self)` as described above.
+   * Call `post_successful_animation()` (which is a misnomer in this case).
 
 `post_successful_animation()` is where you want to put behaviors such as adding a dragged widget
 to a new parent. You can override this method in a subclass of DragNDropWidget.
 
 * If there was not any successful drop:
- * If the `not_drop_ok_do_animation` Property is True (the default), we want an Animation.
-  * Call `on_unsuccessful_drop()`. This is called once even no matter how many widgets we were
-  unsuccessful in dropping onto.
-   * Call `self.failed_drop_func()`, if defined.
-   * If `self.remove_on_drag` is True (the default),
-    * Call `self.reborn()`, which removes the widget from the root Window and re-adds it to the
-    original parent.
-   * else,
-    * Calls `self.un_root_and_close()`, which removes the widget from the root Window and destroys
+  * If the `not_drop_ok_do_animation` Property is True (the default), we want an Animation.
+    * Call `on_unsuccessful_drop()`. This is called once even no matter how many widgets we were unsuccessful in dropping onto.
+    * Call `self.failed_drop_func()`, if defined.
+    * If `self.remove_on_drag` is True (the default),
+      * Call `self.reborn()`, which removes the widget from the root Window and re-adds it to the original parent.
+    * else,
+      * Calls `self.un_root_and_close()`, which removes the widget from the root Window and destroys
     it (because it is a copy of the original DragNDropWidget).
-  * Call `self.post_unsuccessful_animation()` after the Animation is finished, which simply sets the
-  widget's old opacity.
- * If we set the Property to False, we do not want an Animation.
-  * Call `on_unsuccessful_drop()` as above.
-   * Call its submethods, as above.
-  * Call `self.post_unsuccessful_animation()` as above, which simply sets the widget's old opacity.
+  * Call `self.post_unsuccessful_animation()` after the Animation is finished, which simply sets the widget's old opacity.
+  * If we set the Property to False, we do not want an Animation.
+    * Call `on_unsuccessful_drop()` as above.
+      * Call its submethods, as above.
+    * Call `self.post_unsuccessful_animation()` as above, which simply sets the widget's old opacity.
 
 ############## TODO: test app_relative_layout.py ########################################
 
