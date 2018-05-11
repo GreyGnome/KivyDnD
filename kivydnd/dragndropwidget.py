@@ -192,7 +192,7 @@ class DragNDropWidget(Widget):
         # TODO: (after current debugging on 6/17/17)
         if set_opacity:
             self.opacity = self._old_opacity
-        debug.print (" ****************** DRAG N DROP TOTALLY DONE *********************", self, level=DEBUG_DRAG_FINISH)
+        debug.print(" ****************** DRAG N DROP TOTALLY DONE *********************", self, level=DEBUG_DRAG_FINISH)
 
     def set_bound_axis_positions(self):
         for obj in self.bound_zone_objects:
@@ -285,6 +285,7 @@ class DragNDropWidget(Widget):
         # on_touch_move will then do nothing
         # TODO: Figure out why I'm setting drag_finish_state here.
         # TODO: This seems odd, but I needed it at one point.
+        # TODO: I set it in
         # if self.is_double_tap and not self._dragged:
         #     self.set_drag_finish_state() # _drag_started, is_double_tap, _dragged, copy all False
         #     return
@@ -295,25 +296,22 @@ class DragNDropWidget(Widget):
             self.touch_y = mouse_motion_event.y
             debug.print ('dispatch "on_drag_finish", mouse_motion_event) *******************************', level=DEBUG_TOUCH_UP)
             self.dispatch("on_drag_finish", mouse_motion_event)
-            self.set_drag_finish_state()
+            return
             # TODO: Is this right? How do I send on_touch_up after
             # TODO: a double tap?
         else:
             debug.print ("_draggable:", self._draggable, "_dragged:",
                          self._dragged, "is_double_tap:", self.is_double_tap, "up event count:",
                          self._up_event_count, level=DEBUG_TOUCH_UP)
-            # TODO: If the widget is not moved enough, nothing happens. It does not
-            # TODO: get replaced; instead, it hangs out in the root window (I think)
-            # TODO: and is like an orphan.
+        # Here, the user double-tapped and just came up, or
+        # the user single tapped. Kivy sends the first on_touch_up event in the
+        # middle of a double-tap. This handles the case when the touch simply comes
+        # up.
         if ( self.is_double_tap == True and self._up_event_count == 2 ) or self.is_double_tap == False:
             debug.print ("Reset _up_event_count.", level=DEBUG_TOUCH_UP)
             debug.print ("is_double_tap", self.is_double_tap, "_up_event_count", self._up_event_count,
                          level=DEBUG_TOUCH_UP)
-            # self.am_touched = False
-            # self._up_event_count = 0
-            # self.is_double_tap = False
             self.set_drag_finish_state()
-
     # TODO: LOOK ALL OVER FOR DISPATCH, AND SEND COORDS
 
     # TODO: Need to set         Window.bind(mouse_pos=self.on_motion)
@@ -493,6 +491,9 @@ n                  (This means it left that widget without dispatching on_motion
         copy_of_self._dragged = self._dragged
         copy_of_self.is_double_tap = self.is_double_tap
         copy_of_self._up_event_count = self._up_event_count
+        copy_of_self.can_drop_into_parent = self.can_drop_into_parent
+        copy_of_self.rebirth_failed_drop = self.rebirth_failed_drop
+        copy_of_self.close_on_fail = self.close_on_fail
 
     def on_drag_start(self, mouse_motion_event):
         """
@@ -667,13 +668,10 @@ n                  (This means it left that widget without dispatching on_motion
         if got_one_successful_drop:
             debug.print("I will call on_successful_drop", level=DEBUG_DRAG_FINISH)
             if drop_ok_do_animation:
-                anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
-                anim.bind(on_complete=self.post_successful_animation)
-                anim.start(self)
-                self.on_successful_drop()
+                self.on_successful_drop(animation=True)
             else:
-                self.on_successful_drop()
-                self.post_successful_animation()
+                self.on_successful_drop(animation=False)
+                # self.post_successful_animation(None, self)
                 return
         else:
             # TODO: Do we want to run the animation? MIKE check this... is it right
@@ -702,7 +700,7 @@ n                  (This means it left that widget without dispatching on_motion
 
     def reborn(self, widget=None, anim=None):
         global DEBUG_REBORN
-        print ("REBORN!! ================================================")
+        # print ("REBORN!! ================================================")
         debug.print ("self.reborn(), old parent:", self._old_parent, level=DEBUG_REBORN)
         self.un_root_me()
         # BUG: We don't just add the reborn child to the parent.
@@ -761,6 +759,8 @@ n                  (This means it left that widget without dispatching on_motion
         # TODO: CHECK THIS MIKE
         if animation is not True: # The animation will call this, so only call here if not animating
             self.post_unsuccessful_animation()  # Simply resets some flags; opacity will be set after the animation
+        # TODO: PERFORM THIS HERE? Moved from post_unsuccessful_animation
+        # self.set_drag_finish_state(False)
 
     def post_unsuccessful_animation(self, animation=None, widget=None):
         """
@@ -786,7 +786,7 @@ n                  (This means it left that widget without dispatching on_motion
 
     # TODO: If a drop_func is defined, which runs first?
     # TODO: EACH _args for the funcs must have the calling widget!
-    def on_successful_drop(self):
+    def on_successful_drop(self, animation=True):
         """
         If we want an end-of-drop animation:
            Called at the end of a successful drop, after the widget's animation is finished.
@@ -802,7 +802,11 @@ n                  (This means it left that widget without dispatching on_motion
         debug.print ("on_successful_drop 1, Parent:", self.parent, "object: ", self, "copy?", self.copy, level=DEBUG_SUCCESSFUL_DROP)
         debug.print ("object:", self, "added args:", *self.drop_args, level=DEBUG_SUCCESSFUL_DROP)
         debug.print ("is_double_tap?", self.is_double_tap, level=DEBUG_SUCCESSFUL_DROP)
-        #traceback.debug.print_stack()
+        if animation is True:
+            anim = Animation(opacity=0, duration=self.drop_ok_animation_time, t="in_quad")
+            anim.bind(on_complete=self.post_successful_animation)
+            anim.start(self)
+        # traceback.debug.print_stack()
         if self.drop_func is not None:
             debug.print (hex(id(self)), "Calling drop_func...", level=DEBUG_SUCCESSFUL_DROP)
             debug.print ("With args:", self, *self.drop_args, level=DEBUG_SUCCESSFUL_DROP)
@@ -812,15 +816,18 @@ n                  (This means it left that widget without dispatching on_motion
                 if getattr(found_drop_recipient, "drop_func", None) is not None:
                     debug.print (hex(id(self)), "Calling recipient's drop_func", level=DEBUG_SUCCESSFUL_DROP)
                     found_drop_recipient.drop_func(self)
-        self.set_drag_finish_state(False) # Opacity will be set after the animation.
+        # self.set_drag_finish_state(False) # Opacity will be set after the animation.
+        if animation is not True:
+            self.post_successful_animation(None, self)
         debug.print ("on_successful_drop: === end ========================================================", level=DEBUG_SUCCESSFUL_DROP)
 
-    def post_successful_animation(self, animation=None, widget=None):
+    def post_successful_animation(self, animation, widget):
         """
-        A bit of a misnomer, this is called to clean up after any successful drop,
-        but if there's an animation, it will be at the end of the animation.
-        :param animation:
-        :param widget:
+        This is called to clean up after any successful drop's animation, but it's
+        a misnomer, as it is also called at the end of a successful
+        drop without an animation.
+        :param animation: The Animation object from kivy.
+        :param widget: Just the widget calling this, aka self.
         :return:
         """
         global DEBUG_POST_SUCCESSFUL_ANIM
@@ -832,4 +839,4 @@ n                  (This means it left that widget without dispatching on_motion
             if dropped_ok:
                 if getattr(found_drop_recipient, "post_drop_func", None) is not None:
                     found_drop_recipient.post_drop_func(self)
-
+        self.set_drag_finish_state()
