@@ -1,3 +1,15 @@
+Fri May 11 16:56:35 CDT 2018 Version 0.5.1:
+Reordered some of the code, especially for `set_drag_finish_state()`, so that it is more uniform.
+Note: There are some bugs in the code: If you accidentally click on a fading Widget, it could cause an exception.
+I think I need to set the drag finish state before the Animation is finished. The Animation should just be an
+Animation; all processing should be done prior to the Animation doing it's thing. ...That's what I'm thinking at
+the moment.
+
+Tue May  8 06:44:46 CDT 2018 Version 0.5:
+See the pre-Version 0.5 notes. Instituted a requirement for copy-on-drag (ie, the
+`remove_on_drag` Property is set to `False`): the widget must have a kivydnd_copy() method to
+create a widget which is (persumably) a copy of the original widget. The library takes care
+of populating internal variables, and all the Kivy Properties of the widget.
 
 Thu Jan 18 07:52:56 CST 2018 pre-Version 0.5:
 Changes regarding `deepcopy` have been made to the code. See the notes for Version 0.4,
