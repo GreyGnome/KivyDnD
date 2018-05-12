@@ -181,6 +181,8 @@ class DragNDropWidget(Widget):
             self._old_index = self.parent.children.index(self)
 
     def set_drag_finish_state(self, set_opacity=True):
+        # TODO: set_opacity is unused at present.
+        # TODO: Utilize it!
         global DEBUG_DRAG_FINISH
         self.is_double_tap = False
         self._dragged = False
@@ -295,6 +297,9 @@ class DragNDropWidget(Widget):
             self.touch_x = mouse_motion_event.x
             self.touch_y = mouse_motion_event.y
             debug.print ('dispatch "on_drag_finish", mouse_motion_event) *******************************', level=DEBUG_TOUCH_UP)
+            # NOTE: If I don't do this, then I can click on a finished, fading widget.
+            self._dragged = False
+            # NOTE: ...that would cause an Attribute Error
             self.dispatch("on_drag_finish", mouse_motion_event)
             return
             # TODO: Is this right? How do I send on_touch_up after
@@ -781,8 +786,7 @@ n                  (This means it left that widget without dispatching on_motion
         else:
             self.un_root_and_close()
             return
-        self.opacity = self._old_opacity
-        self.set_drag_finish_state(False)
+        self.set_drag_finish_state()
 
     # TODO: If a drop_func is defined, which runs first?
     # TODO: EACH _args for the funcs must have the calling widget!
