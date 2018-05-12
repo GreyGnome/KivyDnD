@@ -126,7 +126,7 @@ in increasing complexities. See them for more on how to use the library.
 | motion_flee_widget_func | self, motion_flee_widget_args | The user-defined method or function that will be run when the pointer leaves this widget, after previously having entered the widget. |
 | motion_outside_widget_func | self, motion_outside_widget_args | The user-defined method or function that will be run as long as the pointer is outside this widget. Can be quite chatty. |
 | drag_start_func | self, drag_start_args, keyword args: "copy" | The user-defined method or function that will be run at the beginning of a drag. If the widget is not removed on drag, then the copied object's drag_start_func is run. Regardless, the first argument to the method is the original "self" object because this function is called from the original widget. Therefore, the `copy_of_self` widget is given in keyword argument "copy"; pop it off the kwargs dict if you need it.|
-| kivydnd_copy | self | The user-defined method or function that will be called when a widget's remove_on_drag Property is set to False.   
+| kivydnd_copy | self | The user-defined method or function that will be called at the start of a drag, if a widget's remove_on_drag Property had been set to False. For those widgets, this method should return an object which is assumed to be a new widget (perhaps, though not necessarily, of the same class). Copies of the DragnDropWidget's Properties are stored in this object by the library. |
 ### DropDestination
 | **Properties** | Type(default value) | Description |
 --- | --- | ---
@@ -289,33 +289,42 @@ call the appropriate user-defined functions. It may then call the ending animati
 performs cleanup. The order of methods called from `on_drag_finish()` is as follows:
 
 * If there was at least one successful drop:
-  * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation. Then:
-    * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more recipients.
+  * Call `on_successful_drop()`. This is called once even if we successfully drop on one or more recipients.
+    * If the `drop_ok_do_animation` Property is True (the default), we want an end-of-drop Animation. Then:
+      * Start the Animation.
+      * On complete, call `post_successful_animation()`
     * Call `self.drop_func()`, if defined.
-    * Call `found_drop_recipient.drop_func(self)` for each successful drop recipient, if defined.
-    * Call `post_successful_animation()` after the widget's animation is finished.
- * If we set the Property to False, we do not want an animation:
-   * Call `on_successful_drop()` immediately.
-     * Calls `self.drop_func()` and `found_drop_recipient.drop_func(self)` as described above.
-   * Call `post_successful_animation()` (which is a misnomer in this case).
+    * For each successful drop recipient, call `found_drop_recipient.drop_func(self)`, if defined.
+    * Once the Animation completes, we enter `post_successful_animation()`:
+      * We are un rooted, which simply means removed from the root window.
+      * We are set to our old capacity.
+      * For each successful drop recipient, call `found_drop_recipient.post_drop_func(self)`, if defined.
+      * Call `set_drag_finish_state`.
 
-`post_successful_animation()` is where you want to put behaviors such as adding a dragged widget
-to a new parent. You can override this method in a subclass of DragNDropWidget.
+    * If the `drop_ok_do_animation` Property to False, we do not want an animation:
+    * Do not start an Animation.
+    * Everything else is as if we had an Animation.
+    * `post_successful_animation()` is where you want to put behaviors such as adding a dragged widget
+      to a new parent. You can override this method in a subclass of DragNDropWidget.
 
 * If there was not any successful drop:
-  * If the `not_drop_ok_do_animation` Property is True (the default), we want an Animation.
-    * Call `on_unsuccessful_drop()`. This is called once even no matter how many widgets we were unsuccessful in dropping onto.
+  * Call `on_unsuccessful_drop()`. This is called once even no matter how many widgets we were unsuccessful in dropping onto.
+    * If the `not_drop_ok_do_animation` Property is True (the default), animate the failed drop. Then:
+      * Start the Animation.
+      * On complete, call `post_unsuccessful_animation()`
     * Call `self.failed_drop_func()`, if defined.
-    * If `self.remove_on_drag` is True (the default),
-      * Call `self.reborn()`, which removes the widget from the root Window and re-adds it to the original parent.
-    * else,
-      * Calls `self.un_root_and_close()`, which removes the widget from the root Window and destroys
-    it (because it is a copy of the original DragNDropWidget).
-  * Call `self.post_unsuccessful_animation()` after the Animation is finished, which simply sets the widget's old opacity.
-  * If we set the Property to False, we do not want an Animation.
-    * Call `on_unsuccessful_drop()` as above.
-      * Call its submethods, as above.
-    * Call `self.post_unsuccessful_animation()` as above, which simply sets the widget's old opacity.
+    * If the `not_drop_ok_do_animation` Property is False, call `post_unsuccessful_animation`.
+    * `post_unsuccessful_animation()`
+      * If `self.remove_on_drag` is True (the default),
+        * If self.rebirth_failed_drop is True (the default),
+          * Call `self.reborn()`, which removes the widget from the root Window and re-adds it to the original parent.
+        * else,
+          * If self.close_on_fail is True:
+            * unroot and destroy the widget
+      * else,
+        * Calls `self.un_root_and_close()`, which removes the widget from the root Window and destroys
+          it (because it is a copy of the original DragNDropWidget).
+      * Call `self.set_drag_finish_state()`
 
 ############## TODO: test app_relative_layout.py ########################################
 
