@@ -7,7 +7,7 @@ with open(path.join('.', 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='kivydnd',
-    version='0.5.0',
+    version='0.5.1',
     description='Kivy Drag-n-Drop for Widgets',
     long_description=long_description,
     long_description_content_type='text/markdown',
