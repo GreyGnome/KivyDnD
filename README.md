@@ -327,7 +327,6 @@ performs cleanup. The order of methods called from `on_drag_finish()` is as foll
       * Call `self.set_drag_finish_state()`
 
 ############## TODO: test app_relative_layout.py ########################################
-############## TODO: test app_relative_layout.py ########################################
 
 ### Properties:
 * `droppable_zone_objects`
