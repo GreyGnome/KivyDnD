@@ -24,7 +24,7 @@
 from __future__ import print_function
 import traceback
 import sys
-import kivy.core.window._window_sdl2
+
 
 # There are two ways to use this: as a Singleton, all controlled by this global
 # debug_flag. Or you can instantiate an object of class Debug, and print using the
@@ -99,32 +99,57 @@ class Debug():
         for arg in args:
             self.debug_flag = arg
         self.register = kwargs.pop("register", 0x00)
+        file = kwargs.pop("file", None)
+        err = kwargs.pop("err", None)
+        if file is not None:
+            self.out_fp = open(file)
+        else:
+            self.out_fp = sys.stdout
+        if err is not None:
+            self.err_fp = open(file)
+        else:
+            self.err_fp = sys.stderr
 
-    def print(self, *args, **kwargs):
+
+    def _print(self, *args, **kwargs):
         """
         If the debug_flag is False this will not print. However, this can be overridden
         by either:
         1. By setting the keyword "definitely" to "True" in the debug.print() call, or
         2. By setting the keyword "level" to a hexadecimal flag value. If that value when
            AND-ed with
+        :rtype: None
         :param args: The stuff to be printed.
         :param kwargs: definitely, or level
         :return: nothing
         """
         definitely = kwargs.pop('definitely', False)
         level = kwargs.pop('level', 0x00)
+        fp = kwargs.pop('fp')
         if not definitely:
             if not (level & self.register):
                 if not self.debug_flag:
                     return
         trace = traceback.extract_stack()
-        # print (len(trace))
-        this_entry = trace[len(trace) - 2]
+        # print ("DEBUG debug_print: LEN trace: ", len(trace))
+        # print ("DEBUG debug_print: type trace: ", type(trace))
+        # for entry in trace:
+        #     print ("DEBUG debug_print entry: ", entry)
+        #
+        # The last one is this method, which is called by the print method,
+        # which was called by the actual program under debug. Hence: len - 3
+        this_entry = trace[len(trace) - 3]
         basename = this_entry[0].split('/')
         basename = "%-10s" % basename[len(basename) - 1]
         method = this_entry[2] + "()"
         method = "%-15s" % method
-        print(basename + ":" + str(this_entry[1]), method, args, kwargs)
+        print(basename + ":" + str(this_entry[1]), method, args, kwargs, file=fp)
+
+    def print(self, *args, **kwargs):
+        self._print(*args, fp=self.out_fp, **kwargs)
+
+    def err_print(self, *args, **kwargs):
+        self._print(*args, fp=self.err_fp, **kwargs)
 
     def print_trace(self, *args, **kwargs):
         definitely = kwargs.pop('definitely', False)
@@ -136,6 +161,8 @@ class Debug():
         traceback.print_stack()
 
     def print_widget_ancestry(self, widget, *args, **kwargs):
+        import kivy.core.window._window_sdl2
+
         definitely = kwargs.get('definitely',False)
         if not definitely:
             if not self.debug_flag:
